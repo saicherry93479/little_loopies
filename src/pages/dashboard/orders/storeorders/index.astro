@@ -1,0 +1,29 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import OrderScreen from "./_components/OrderScreen";
+import { db } from "@/lib/db";
+
+
+const orders = await db.query.storeOrders.findMany({
+  with: {
+    order: true,
+    store: true,
+  },
+});
+
+
+const { permissions,user } = Astro.locals;
+
+if (!permissions.includes("Stores_Orders_Read") && user?.userType!=='admin') {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+const writeAccess = user?.userType === "admin" || permissions.includes("Stores_Orders_Write");
+
+console.log("orders in admin testing ", orders);
+
+---
+
+<DashboardLayout title="allorders">
+  <OrderScreen client:load allOrders={orders} {writeAccess}  />
+</DashboardLayout>

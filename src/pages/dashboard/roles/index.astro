@@ -1,0 +1,25 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import UserRolesScreen from "./_components/UserRolesScreen";
+import { db } from "@/lib/db";
+
+const allRoles = await db.query.roles.findMany({
+  with: {
+    rolePermissions: {
+      with: {
+        permission: true,
+      },
+    },
+  },
+});
+
+const { permissions, user } = Astro.locals;
+
+if (user?.userType !== "admin" && !permissions?.includes("Roles_Read")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <UserRolesScreen roles={allRoles} client:only />
+</DashboardLayout>

@@ -1,0 +1,30 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import NewCategoryScreen from "./_components/NewCategoryScreen.tsx";
+import { categories, type Category } from "@/lib/db/schema";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+
+const { categoryId } = Astro.params;
+let categoryData: Category | null = null;
+
+if (categoryId !== "new") {
+  let returnData: Category[] = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.id, categoryId));
+  categoryData = returnData.length > 0 ? returnData[0] : null;
+}
+
+console.log("category is ", categoryData);
+
+const { permissions ,user} = Astro.locals;
+
+if (!permissions?.includes("Categories_Write") && user?.userType !== "admin") {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <NewCategoryScreen categoryData={categoryData} client:load />
+</DashboardLayout>

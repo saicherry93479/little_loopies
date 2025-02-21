@@ -1,0 +1,102 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import InvoicesScreen from "./_components/InvoicesScreen";
+import { db } from "@/lib/db";
+import { invoices, orders, customerOrders, storeOrders, orderItems } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+const { permissions, user } = Astro.locals;
+
+if (!permissions?.includes("Invoices_Read") && user?.userType !== "admin") {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+const isStoreUser = user.userType === "Store";
+const writeAccess = permissions?.includes("Invoices_Write") || user?.userType === "admin";
+
+let invoicesData;
+if (isStoreUser) {
+  // Fetch invoices related to store orders
+  const storeInvoices = await db
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.id,
+      amount: invoices.amount,
+      status: invoices.status,
+      paymentMethod: invoices.paymentMethod,
+      createdAt: invoices.createdAt,
+      orderId: orders.id,
+      orderStatus: orders.status,
+      storeId: storeOrders.storeId,
+      customerName: customerOrders.name,
+      shippingAddress: customerOrders.shippingAddress,
+    })
+    .from(invoices)
+    .leftJoin(orders, eq(invoices.orderId, orders.id))
+    .leftJoin(storeOrders, eq(orders.id, storeOrders.orderId))
+    .leftJoin(customerOrders, eq(orders.id, customerOrders.orderId))
+    .where(eq(storeOrders.storeId, user.storeId));
+
+  // Fetch items for each invoice
+  invoicesData = await Promise.all(
+    storeInvoices.map(async (invoice) => {
+      const items = await db
+        .select({
+          name: orderItems.name,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: orderItems.totalPrice,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, invoice.orderId));
+
+      return { ...invoice, items };
+    })
+  );
+} else {
+  // Admin view - get all invoices with related order details
+  const adminInvoices = await db
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.id,
+      amount: invoices.amount,
+      status: invoices.status,
+      paymentMethod: invoices.paymentMethod,
+      createdAt: invoices.createdAt,
+      orderId: orders.id,
+      orderStatus: orders.status,
+      customerName: customerOrders.name,
+      customerEmail: customerOrders.email,
+      shippingAddress: customerOrders.shippingAddress,
+    })
+    .from(invoices)
+    .leftJoin(orders, eq(invoices.orderId, orders.id))
+    .leftJoin(customerOrders, eq(orders.id, customerOrders.orderId));
+
+  // Fetch items for each invoice
+  invoicesData = await Promise.all(
+    adminInvoices.map(async (invoice) => {
+      const items = await db
+        .select({
+          name: orderItems.name,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: orderItems.totalPrice,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, invoice.orderId));
+
+      return { ...invoice, items };
+    })
+  );
+}
+---
+
+<DashboardLayout title="Invoices">
+  <InvoicesScreen
+    writeAccess={writeAccess}
+    isStoreUser={isStoreUser}
+    invoicesAll={invoicesData || []}
+    client:load
+  />
+</DashboardLayout>

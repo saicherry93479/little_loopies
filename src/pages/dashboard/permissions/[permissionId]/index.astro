@@ -1,0 +1,28 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import PermissionScreen from "./_components/PermissionScreen";
+import { db } from "@/lib/db";
+import { permissions as PermissionTable } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+const { permissionId } = Astro.params;
+let permissionData = null;
+
+if (permissionId !== "new") {
+  let data = await db.query.permissions.findMany({
+    where: eq(PermissionTable.id, permissionId),
+  });
+  permissionData = data.length > 0 ? data[0] : null;
+}
+
+const { permissions, user } = Astro.locals;
+
+// Admin bypass permission check
+if (user?.userType !== "admin" && !permissions?.includes("Permissions_Write")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <PermissionScreen permissionData={permissionData} client:only />
+</DashboardLayout>

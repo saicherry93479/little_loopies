@@ -1,0 +1,15 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import CartScreen from './_components/CartScreen.tsx'
+import { db } from "@/lib/db";
+import { categories, type Category } from "@/lib/db/schema";
+
+
+const categoriesData:Category[] = await db.select().from(categories)
+
+console.log("categoriesData ",categoriesData)
+---
+
+<DashboardLayout title='admin'>
+  <CartScreen {categoriesData} client:load></CartScreen>
+</DashboardLayout>

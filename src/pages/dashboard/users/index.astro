@@ -1,0 +1,20 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import UsersScreen from "./_components/UsersScreen";
+import { db } from "@/lib/db";
+
+const allUsers = await db.query.users.findMany({});
+const { permissions, user } = Astro.locals;
+
+// Admin bypass permission check
+if (user?.userType !== "admin" && !permissions.includes("Users_Read")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+// Admin always has write access
+const writeAccess = user?.userType === "admin" || permissions.includes("Users_Write");
+---
+
+<DashboardLayout title="admin">
+  <UsersScreen {writeAccess} users={allUsers} client:load />
+</DashboardLayout>

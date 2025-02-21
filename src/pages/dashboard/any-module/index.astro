@@ -1,0 +1,11 @@
+---
+import { hasReadAccess, hasWriteAccess } from "@/lib/utils/permissions";
+
+const { user, permissions } = Astro.locals;
+
+if (!hasReadAccess(user, permissions, "ModuleName")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+const writeAccess = hasWriteAccess(user, permissions, "ModuleName");
+--- 

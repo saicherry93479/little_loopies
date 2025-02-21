@@ -1,0 +1,13 @@
+---
+
+import AuthLayout from '@/layouts/AuthLayout.astro'
+import SignInViewPage from './_components/SignInPage'
+import { hashPassword } from '@/lib/utils/password'
+
+
+---
+<AuthLayout title='dashboard'>
+
+    <SignInViewPage client:load></SignInViewPage>
+</AuthLayout>
+

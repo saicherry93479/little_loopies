@@ -1,0 +1,35 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import RoleScreen from "./_components/RoleScreen";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { roles } from "@/lib/db/schema";
+
+const { roleId } = Astro.params;
+let roleData = null;
+
+if (roleId !== "new") {
+  let data = await db.query.roles.findMany({
+    where: eq(roles.id, roleId),
+    with: {
+      rolePermissions: {
+        with: {
+          permission: true,
+        },
+      },
+    },
+  });
+  roleData = data.length > 0 ? data[0] : null;
+}
+console.log(" roleData  is ", roleData);
+
+const { permissions, user } = Astro.locals;
+
+if (!permissions?.includes("Roles_Write") && user?.userType !== "admin") {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <RoleScreen client:only roleData={roleData} />
+</DashboardLayout>

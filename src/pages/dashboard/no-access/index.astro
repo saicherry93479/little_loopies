@@ -1,0 +1,12 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import NoAccessScreen from "./_components/NoAccessScree";
+import { db } from "@/lib/db";
+
+let { user } = Astro.locals;
+console.log("user dashboard is ", user);
+---
+
+<DashboardLayout title="admin">
+  <NoAccessScreen client:load />
+</DashboardLayout>

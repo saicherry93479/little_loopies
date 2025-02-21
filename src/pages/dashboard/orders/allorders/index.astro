@@ -1,0 +1,96 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import OrderScreen from "./_components/OrderScreen";
+import { db } from "@/lib/db";
+import { customerOrders, orders, users, orderItems, store, assignedOrdersToStore } from "@/lib/db/schema";
+import { eq, sql, and } from "drizzle-orm";
+
+const { permissions, user } = Astro.locals;
+
+if (!permissions.includes("Orders_Read") && user?.userType!=='admin') {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+// Check if user is a store user
+let storeId = null;
+if (user.userType === "Store") {
+  const storeUser = await db.query.store.findFirst({
+    where: eq(store.userId, user.id),
+    columns: {
+      id: true
+    }
+  });
+  storeId = storeUser?.id;
+}
+
+// Base query
+let baseQuery = db
+  .select({
+    // Customer Order fields
+    orderId: customerOrders.orderId,
+    userId: customerOrders.userId,
+    shippingAddress: customerOrders.shippingAddress,
+    paymentStatus: customerOrders.paymentStatus,
+    paymentMethod: customerOrders.paymentMethod,
+
+    // Order fields
+    orderType: orders.orderType,
+    orderStatus: orders.status,
+    totalAmount: orders.totalAmount,
+    orderNotes: orders.notes,
+    orderCreatedAt: orders.createdAt,
+    orderUpdatedAt: orders.updatedAt,
+    orderAssignedTo: orders.assignedTo,
+
+    // User fields
+    userName: customerOrders.name,
+    userEmail: customerOrders.email,
+    userMobile: customerOrders.mobile,
+    
+    // Store fields (for assigned store information)
+    assignedStoreId: assignedOrdersToStore.storeId,
+    
+    // Order Items as a JSON array subquery
+    orderItems: sql<string>`
+      json_group_array(
+        json_object(
+          'id', ${orderItems.id},
+          'productId', ${orderItems.productId},
+          'name', ${orderItems.name},
+          'quantity', ${orderItems.quantity},
+          'unitPrice', ${orderItems.unitPrice},
+          'totalPrice', ${orderItems.totalPrice},
+          'discount', ${orderItems.discount},
+          'createdAt', ${orderItems.createdAt}
+        )
+      )`.as('orderItems')
+  })
+  .from(customerOrders)
+  .leftJoin(orders, eq(customerOrders.orderId, orders.id))
+  .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
+  .leftJoin(assignedOrdersToStore, eq(orders.id, assignedOrdersToStore.orderId));
+
+// If user is a store, only show orders assigned to their store
+if (storeId) {
+  baseQuery = baseQuery.where(
+    and(
+      eq(assignedOrdersToStore.storeId, storeId)
+    )
+  );
+}
+
+const allOrders = await baseQuery.groupBy(customerOrders.orderId);
+
+const writeAccess = user?.userType === "admin" || permissions.includes("Orders_Write");
+console.log("allOrders ", allOrders);
+---
+
+<DashboardLayout title="allorders">
+  <OrderScreen 
+    writeAccess={writeAccess} 
+    allOrders={allOrders} 
+    isStoreUser={Boolean(storeId)}
+    storeId={storeId} 
+    client:load 
+  />
+</DashboardLayout>

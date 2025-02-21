@@ -1,0 +1,14 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import NewStore from "./_components/NewStore.tsx";
+
+const { permissions,user } = Astro.locals;
+
+if (!permissions.includes("Stores_Write") && user?.userType!=='admin') {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <NewStore client:load />
+</DashboardLayout>

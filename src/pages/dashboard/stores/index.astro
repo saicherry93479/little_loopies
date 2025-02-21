@@ -1,0 +1,20 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import StoresScreen from './_components/StoreScreen'
+import { db } from "@/lib/db";
+
+const storesData = await db.query.store.findMany();
+const { permissions, user } = Astro.locals;
+
+// Admin bypass permission check
+if (user?.userType !== "admin" && !permissions?.includes("Stores_Read")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+// Admin always has write access
+const writeAccess = user?.userType === "admin" || permissions?.includes("Stores_Write");
+---
+
+<DashboardLayout title="Stores">
+  <StoresScreen stores={storesData} {writeAccess} client:load />
+</DashboardLayout>

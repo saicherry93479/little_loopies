@@ -1,0 +1,17 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import DashboardScreen from "./_components/DashboardScreen";
+
+const { user } = Astro.locals;
+
+// Only admin and staff can access dashboard
+if (user?.userType === "customer") {
+  return Astro.redirect("/", 302);
+}
+---
+
+<DashboardLayout title="Dashboard">
+  <DashboardScreen 
+    client:load 
+  />
+</DashboardLayout>

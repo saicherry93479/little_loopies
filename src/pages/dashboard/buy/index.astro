@@ -1,0 +1,26 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import BuyScreen from "./_components/BuyScreen.tsx";
+import { db } from "@/lib/db";
+import { categories, products, type Category } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+const productsAll = await db.query.products.findMany({
+  where: eq(products.isWholesaleEnabled, "Yes"),
+  with: {
+    categories: true,
+    wholesalePriceTiers: true,
+  },
+});
+
+console.log("products are ", productsAll);
+const { permissions,user } = Astro.locals;
+
+if (!permissions.includes("Buy_Read") && user?.userType !== 'admin') {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <BuyScreen {productsAll} client:load />
+</DashboardLayout>

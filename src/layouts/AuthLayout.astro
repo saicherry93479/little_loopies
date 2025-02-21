@@ -1,0 +1,45 @@
+---
+import "../styles/global.css";
+import { ViewTransitions } from "astro:transitions";
+import { Toaster } from "@/components/ui/toaster";
+import { hashPassword } from "@/lib/utils/password";
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <ViewTransitions />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Outfit:wght@100..900&family=Rubik+Mono+One&family=Varela+Round&family=Yatra+One&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <slot />
+    <Toaster client:load />
+  </body><style>
+    * {
+      margin: 0;
+
+      box-sizing: border-box;
+    }
+    html {
+      font-family: "Jost", sans-serif;
+      background: white;
+    }
+  </style>
+</html>

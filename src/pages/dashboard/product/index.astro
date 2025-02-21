@@ -1,0 +1,79 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import ProductsScreen from "./_components/ProductsScreen.tsx";
+import { db } from "@/lib/db";
+import { products, storeProducts, store } from "@/lib/db/schema";
+import { eq, sql, sum } from "drizzle-orm";
+
+let productsData = await db.query.products.findMany({
+  with: {
+    categories: true,
+  },
+});
+
+const { permissions, user } = Astro.locals;
+
+// Admin bypass permission check
+if (user?.userType !== "admin" && !permissions?.includes("Product_Read")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+// Admin always has write access
+const writeAccess = user?.userType === "admin" || permissions?.includes("Product_Write");
+
+const isStoreUser = user.userType === "Store";
+
+if (isStoreUser) {
+  const userStore = await db
+    .select()
+    .from(store)
+    .where(eq(store.userId, user.id))
+    .limit(1);
+
+  if (userStore?.[0]) {
+    productsData = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        images: products.images,
+        companyPrice: products.userPrice,
+        totalStock: sql<number>`sum(${storeProducts.stock})`,
+        totalQuantityOrdered: sql<number>`sum(${storeProducts.storeQuantity})`,
+        averageStorePrice: sql<number>`avg(${storeProducts.price})`,
+        // Optional: Count how many entries exist for this product
+        locationCount: sql<number>`count(${storeProducts.id})`,
+        // Get the latest storeProductId
+        latestStoreProductId: sql<string>`max(${storeProducts.id})`
+      })
+      .from(storeProducts)
+      .leftJoin(products, eq(storeProducts.productId, products.id))
+      .where(eq(storeProducts.storeId, userStore[0].id))
+      .groupBy(
+        products.id,
+        products.name,
+        products.description,
+        products.images,
+        products.userPrice
+      );
+  }
+} else {
+  // Admin view - get all products
+  productsData = await db.query.products.findMany({
+    with: {
+      categories: true,
+      wholesalePriceTiers: true,
+      items: true
+    },
+  });
+}
+---
+
+<DashboardLayout title="admin">
+  <ProductsScreen 
+    writeAccess={writeAccess} 
+    isStoreUser={isStoreUser} 
+    productsAll={productsData || []} 
+    client:load 
+  />
+</DashboardLayout>

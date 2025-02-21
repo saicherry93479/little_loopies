@@ -1,0 +1,31 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import NewProductScreen from "./_components/NewProductScreen";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { products } from "@/lib/db/schema";
+
+const { productId } = Astro.params;
+let productData = null;
+
+if (productId !== "new") {
+  let data = await db.query.products.findMany({
+    where: eq(products.id, productId),
+    with: {
+      categories: true,
+      wholesalePriceTiers: true,
+    },
+  });
+  productData = data.length > 0 ? data[0] : null;
+}
+
+const { permissions ,user} = Astro.locals;
+console.log("permissions in productpage  ", permissions);
+if (!permissions.includes("Product_Write") &&  user?.userType!=='admin') {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+---
+
+<DashboardLayout title="admin">
+  <NewProductScreen productData={productData} client:only />
+</DashboardLayout>

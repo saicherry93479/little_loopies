@@ -1,0 +1,10 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import {EmailCampaignManager} from "./_componnets/EmailCampaignManager"
+
+
+---
+
+<DashboardLayout title="admin">
+  <EmailCampaignManager  client:load  />
+</DashboardLayout>
