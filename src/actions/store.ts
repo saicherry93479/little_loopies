@@ -54,8 +54,9 @@ export const createStore = defineAction({
   handler: protectedAction(async (data) => {
     try {
       return await db.transaction(async (tx) => {
-        const password = generatePassword();
+        const password = await generatePassword();
         const hash = await hashPassword(password);
+        console.log("hash is ", hash);
         const [user] = await tx
           .insert(users)
           .values({
@@ -66,7 +67,7 @@ export const createStore = defineAction({
             password: hash,
           })
           .returning({ id: users.id });
-
+        console.log("user is ", user);
         const [result] = await tx
           .insert(store)
           .values({

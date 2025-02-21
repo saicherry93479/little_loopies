@@ -8,11 +8,13 @@ const bcrypt = {
 export async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
 	const salt = new Uint8Array(16);
+  console.log("password is ", password);
   const hashedPassword = await bcrypt.hash({
     password,
     costFactor: saltRounds,
     salt,
   });
+  console.log("hashedPassword is ", hashedPassword);
   return hashedPassword;
 }
 
@@ -35,5 +37,6 @@ export async function generatePassword(length: number = 10): Promise<string> {
     const randomNumber = Math.floor(Math.random() * charset.length);
     randomString += charset.charAt(randomNumber);
   }
+  console.log("randomString is ", randomString);
   return randomString;
 }

@@ -27,5 +27,5 @@ if (!permissions.includes("Product_Write") &&  user?.userType!=='admin') {
 ---
 
 <DashboardLayout title="admin">
-  <NewProductScreen productData={productData} client:only />
+  <NewProductScreen productData={productData} client:load />
 </DashboardLayout>

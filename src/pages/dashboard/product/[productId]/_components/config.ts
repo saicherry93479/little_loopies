@@ -19,17 +19,6 @@ export const formConfig: FormConfig = {
       space: 1, // Takes half width
     },
     {
-      name: "weight",
-      type: "input",
-      inputType: "number",
-      validation: z.number().min(5),
-
-      label: "Product Weight( in grams)",
-      placeholder: "Enter weight of Product",
-
-      space: 1,
-    },
-    {
       name: "productQuantity",
       type: "input",
       inputType: "number",

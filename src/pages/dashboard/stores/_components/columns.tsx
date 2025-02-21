@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import OrderDetails from "../../orders/allorders/_components/OrderDetails";
 import { actions } from "astro:actions";
 import GlobalDeleteModal from "@/components/dashbaord/GlobalDeleteModal";
+import { toast } from "sonner";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -139,10 +139,16 @@ export const columns: ColumnDef<any>[] = [
               <p
                 onClick={async () => {
                   // sendPasswordEmail("saicherry93479@gmail.com");
-                  await actions.sendStoreEmail({
-                    storeId: store.id,
+                  const res = await actions.sendStoreEmail({
+                    id: store.id,
                     email: store.email,
                   });
+                  console.log("res is ", res);
+                  if(res.data?.success){
+                    toast.success(res.data?.message || "Email sent successfully")
+                  }else{
+                    toast.error(res.data?.message || "Email not sent,Please try again")
+                  }
                 }}
               >
                 Send Credentials
@@ -162,6 +168,7 @@ export const columns: ColumnDef<any>[] = [
               description={`Are you sure you want to delete ${row.original.name}?`}
             />
           </DropdownMenuContent>
+        
         </DropdownMenu>
       );
     },

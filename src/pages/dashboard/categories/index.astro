@@ -4,6 +4,7 @@ import CategoriesScreen from "./_components/CategoriesScree";
 import { db } from "@/lib/db";
 
 const categoriesData = await db.query.categories.findMany();
+
 const { permissions, user } = Astro.locals;
 
 // Admin bypass permission check
@@ -16,5 +17,5 @@ const writeAccess = user?.userType === "admin" || permissions?.includes("Categor
 ---
 
 <DashboardLayout title="Categories">
-  <CategoriesScreen categories={categoriesData} {writeAccess} client:load />
+  <CategoriesScreen categoriesData={categoriesData} writeAccess={writeAccess || false} client:load />
 </DashboardLayout>

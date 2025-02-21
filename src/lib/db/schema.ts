@@ -137,7 +137,6 @@ export const products = sqliteTable("products", {
   description: text("description"),
   images: text("images", { mode: "json" }).$type<string[]>(),
   productQuantity: integer("quantity").notNull().default(5),
-  productWeight: integer("weight").notNull().default(250),
   // Retail pricing
   userPrice: real("user_price").notNull(),
   userDiscountPercentage: real("user_discount_percentage").default(0),
