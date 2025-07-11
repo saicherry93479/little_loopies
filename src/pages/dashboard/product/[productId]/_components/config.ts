@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { categories } from "@/lib/db/schema";
 import type { FormConfig } from "@/types";
 import { actions } from "astro:actions";
-import * as z from "zod";
+import { z } from "zod";
 import { eq } from 'drizzle-orm';
 
 const dataFromCategories = async () => {
@@ -185,8 +185,11 @@ export const formConfig: FormConfig = {
         {
           name: "sizes",
           type: "dynamicGroup",
-          label: "Available Sizes",
-          validation: z.array(z.any()),
+          label: "Available Sizes (at least one required)",
+          validation: z.array(z.object({
+            size: z.string().min(1, "Size is required"),
+            quantity: z.number().min(0, "Quantity must be non-negative")
+          })).min(1, "At least one size is required"),
           space: 2,
           dynamicFields: [
             {
@@ -214,8 +217,11 @@ export const formConfig: FormConfig = {
     {
       name: "pricing",
       type: "dynamicGroup",
-      label: "Quantity-based Pricing For Stores",
-      validation: z.array(z.any()),
+      label: "Quantity-based Pricing For Stores (at least one required)",
+      validation: z.array(z.object({
+        quantity: z.number().min(10, "Quantity must be at least 10"),
+        price: z.number().min(10, "Price must be at least 10")
+      })).min(1, "At least one pricing tier is required"),
       space: 2,
       condition: (values) => values.isWholesaleEnabled === "Yes",
       dynamicFields: [

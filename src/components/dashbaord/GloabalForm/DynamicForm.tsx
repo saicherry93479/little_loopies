@@ -57,8 +57,13 @@ const DynamicForm = ({
     {}
   );
 
+  // Track unique identifiers for dynamic groups
+  const [dynamicGroupIdentifiers, setDynamicGroupIdentifiers] = useState<Record<string, string[]>>({});
+
   React.useEffect(() => {
     const initialGroups: Record<string, number[]> = {};
+    const initialIdentifiers: Record<string, string[]> = {};
+    
     fields.forEach((field) => {
       if (field.type === "dynamicGroup") {
         const defaultGroupLength = defaultValues?.[field.name]?.length || 1;
@@ -66,9 +71,16 @@ const DynamicForm = ({
           { length: defaultGroupLength },
           (_, i) => i
         );
+        
+        // Generate unique identifiers for each group
+        initialIdentifiers[field.name] = Array.from(
+          { length: defaultGroupLength },
+          () => Math.random().toString(36).substring(2, 9)
+        );
       }
     });
     setDynamicGroups(initialGroups);
+    setDynamicGroupIdentifiers(initialIdentifiers);
   }, [fields, defaultValues]);
 
   useEffect(() => {
@@ -91,16 +103,20 @@ const DynamicForm = ({
   }, [defaultValues, fields]);
 
   const handleFileChange = (fieldName: string, newFiles: FileState[]) => {
+    // Extract the base field name and any parent group identifiers
+    const parts = fieldName.split('.');
+    const baseFieldName = parts[parts.length - 1];
+    const parentPath = parts.slice(0, -1).join('.');
+    
     setFileStates((prev) => {
+      // Use the full field path as the key to ensure uniqueness
       const existingFiles = prev[fieldName] || [];
-      // Create a unique identifier for the field to avoid sharing images across variants
-      const uniqueFieldId = fieldName + '-' + Math.random().toString(36).substring(2, 9);
       
       const newFileStates = newFiles.map((fileState) => ({
         file: fileState.file,
         preview: URL.createObjectURL(fileState?.file),
         isExisting: false,
-        fieldId: uniqueFieldId
+        fieldId: fieldName // Use the full field path as the identifier
       }));
 
       return {
@@ -189,55 +205,136 @@ const DynamicForm = ({
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       console.log("dynamic form ", values);
+      
+      // Validate that each color variant has at least one size
+      if (values.colorVariants) {
+        const colorVariants = values.colorVariants;
+        const indices = dynamicGroups['colorVariants'] || [0];
+        
+        for (let i = 0; i < indices.length; i++) {
+          const hasSizes = indices.some(index => 
+            colorVariants[`sizes_${index}`] && 
+            Array.isArray(colorVariants[`sizes_${index}`]) && 
+            colorVariants[`sizes_${index}`].length > 0
+          );
+          
+          if (!hasSizes) {
+            toast({
+              title: "Validation Error",
+              description: `Each color variant must have at least one size`,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+      
       setIsSubmitting(true);
       const fileFields = fields.filter((f) => f.type === "file");
       console.log("files are ", fileFields);
       const uploadPromises = fileFields.map(async (field) => {
         // Get files for this specific field
         const fieldName = field.name;
-        const fieldFiles = fileStates[fieldName] || [];
-        console.log(fieldFiles);
-        // Only upload new files
-        const filesToUpload = fieldFiles
-          .filter((fileState) => !fileState.isExisting && fileState.file)
-          .map((fileState) => fileState.file!);
-        console.log("filesToUpload ", filesToUpload);
-        let uploadedUrls: string[] = [];
-        if (filesToUpload.length > 0) {
-          uploadedUrls = (await onFileUpload?.(filesToUpload)) || [];
-          // return
-          if (uploadedUrls.length === 0) {
-            toast({
-              title: "Unable to do action",
-              variant: "destructive",
-              description: "Please try after sometime/try to contact company",
-            });
-            return;
+        
+        // For regular file fields
+        if (!fieldName.includes('.')) {
+          const fieldFiles = fileStates[fieldName] || [];
+          // Only upload new files
+          const filesToUpload = fieldFiles
+            .filter((fileState) => !fileState.isExisting && fileState.file)
+            .map((fileState) => fileState.file!);
+            
+          let uploadedUrls: string[] = [];
+          if (filesToUpload.length > 0) {
+            uploadedUrls = (await onFileUpload?.(filesToUpload)) || [];
+            if (uploadedUrls.length === 0) {
+              toast({
+                title: "Unable to do action",
+                variant: "destructive",
+                description: "Please try after sometime/try to contact company",
+              });
+              return { [fieldName]: [] };
+            }
           }
+          
+          // Combine existing URLs with new uploaded URLs
+          const allUrls = fieldFiles
+            .map((fileState) =>
+              !fileState.isExisting ? uploadedUrls.shift() : fileState.preview
+            )
+            .filter(Boolean) as string[];
+            
+          return { [fieldName]: allUrls };
         }
-        console.log("uploadedUrls ", uploadedUrls);
-        // Combine existing URLs with new uploaded URLs
-        const allUrls = fieldFiles
-          .map((fileState) =>
-            !fileState.isExisting ? uploadedUrls.shift() : fileState.preview
-          ) 
-          .filter(Boolean) as string[];
-
-        return { [fieldName]: allUrls };
+        
+        // For dynamic group file fields, we need to handle them differently
+        // We'll collect all the file states that match the pattern for this field
+        const dynamicFieldFiles: Record<string, FileState[]> = {};
+        Object.entries(fileStates).forEach(([key, files]) => {
+          if (key.startsWith(`${fieldName}_`)) {
+            dynamicFieldFiles[key] = files;
+          }
+        });
+        
+        // Process each dynamic field separately
+        const dynamicFieldPromises = Object.entries(dynamicFieldFiles).map(async ([key, files]) => {
+          const filesToUpload = files
+            .filter((fileState) => !fileState.isExisting && fileState.file)
+            .map((fileState) => fileState.file!);
+            
+          if (filesToUpload.length === 0) {
+            return { [key]: files.map(f => f.preview).filter(Boolean) };
+          }
+          
+          const uploadedUrls = (await onFileUpload?.(filesToUpload)) || [];
+          if (uploadedUrls.length === 0 && filesToUpload.length > 0) {
+            toast({
+              title: "Unable to upload files",
+              variant: "destructive",
+              description: "Please try after sometime",
+            });
+            return { [key]: [] };
+          }
+          
+          const allUrls = files
+            .map((fileState) =>
+              !fileState.isExisting ? uploadedUrls.shift() : fileState.preview
+            )
+            .filter(Boolean) as string[];
+            
+          return { [key]: allUrls };
+        });
+        
+        const results = await Promise.all(dynamicFieldPromises);
+        const combinedResults = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+        
+        // Now we need to organize these by their group index
+        const groupedUrls: Record<number, string[]> = {};
+        Object.entries(combinedResults).forEach(([key, urls]) => {
+          // Extract the index from the key (e.g., "colorVariants.images_0_abc123" -> 0)
+          const match = key.match(/_(\d+)_/);
+          if (match && match[1]) {
+            const index = parseInt(match[1], 10);
+            groupedUrls[index] = urls as string[];
+          }
+        });
+        
+        return { [`${fieldName}UrlsByIndex`]: groupedUrls };
       });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const fileUrls = uploadedUrls.reduce(
+      
+      const uploadResults = await Promise.all(uploadPromises);
+      const fileUrls = uploadResults.reduce(
         (acc, curr) => ({ ...acc, ...curr }),
         {}
       );
-
+      
       // Transform dynamic group values into a more usable format
       const transformedValues = { ...values };
       fields.forEach((field) => {
         if (field.type === "dynamicGroup" && field.dynamicFields) {
           const groupData: any[] = [];
           const indices = dynamicGroups[field.name] || [0];
+          
           indices.forEach((index) => {
             const groupItem: any = {};
             field.dynamicFields?.forEach((subField) => {
@@ -256,6 +353,10 @@ const DynamicForm = ({
                 });
                 
                 groupItem[subField.name] = nestedItems;
+              } else if (subField.type === "file") {
+                // For file fields in dynamic groups, use the uploaded URLs
+                const urlsByIndex = fileUrls[`${field.name}.${subField.name}UrlsByIndex`] || {};
+                groupItem[subField.name] = urlsByIndex[index] || [];
               } else {
                 // Regular field
                 groupItem[subField.name] = 
@@ -267,9 +368,17 @@ const DynamicForm = ({
           transformedValues[field.name] = groupData;
         }
       });
-
+      
+      // Add regular file fields
+      const regularFileUrls = Object.entries(fileUrls)
+        .filter(([key]) => !key.includes('UrlsByIndex'))
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+      
+      const finalValues = { ...transformedValues, ...regularFileUrls };
+      console.log("Final values to submit:", finalValues);
+      
       const resp = await onSubmit(
-        { ...transformedValues, ...fileUrls },
+        finalValues,
         defaultValues ? true : false
       );
       if (resp.data.success) {
@@ -314,6 +423,15 @@ const DynamicForm = ({
         [fieldName]: [...currentIndices, newIndex],
       };
     });
+    
+    // Add a new unique identifier for this group
+    setDynamicGroupIdentifiers((prev) => {
+      const currentIdentifiers = prev[fieldName] || [];
+      return {
+        ...prev,
+        [fieldName]: [...currentIdentifiers, Math.random().toString(36).substring(2, 9)]
+      };
+    });
   };
 
   const removeDynamicGroup = (fieldName: string, indexToRemove: number) => {
@@ -327,6 +445,17 @@ const DynamicForm = ({
       return {
         ...prev,
         [fieldName]: newIndices,
+      };
+    });
+    
+    // Remove the corresponding identifier
+    setDynamicGroupIdentifiers((prev) => {
+      const currentIdentifiers = prev[fieldName] || [];
+      if (currentIdentifiers.length <= 1) return prev;
+      
+      return {
+        ...prev,
+        [fieldName]: currentIdentifiers.filter((_, i) => i !== indexToRemove)
       };
     });
 
@@ -345,12 +474,15 @@ const DynamicForm = ({
 
   const renderDynamicGroup = (field: FieldConfig) => {
     const indices = dynamicGroups[field.name] || [0];
+    const identifiers = dynamicGroupIdentifiers[field.name] || indices.map(() => Math.random().toString(36).substring(2, 9));
     const defaultGroupValues = defaultValues?.[field.name] || [];
 
     return (
       <div className={`grid ${getGridClass(columns)} gap-6`}>
-        {indices.map((index) => {
+        {indices.map((index, arrayIndex) => {
           const defaultValue = defaultGroupValues[index] || {};
+          const groupIdentifier = identifiers[arrayIndex] || Math.random().toString(36).substring(2, 9);
+          
           return (
             <div
               key={`${field.name}_${index}`}
@@ -358,6 +490,32 @@ const DynamicForm = ({
             >
               <div className="flex gap-4 flex-wrap">
                 {field.dynamicFields?.map((subField) => (
+                  subField.type === "file" ? (
+                    <FormField
+                      key={`${subField.name}_${index}`}
+                      control={form.control}
+                      name={`${field.name}.${subField.name}_${index}`}
+                      render={({ field: formField }) => (
+                        <FormItem
+                          className={`flex-1 min-w-[200px] ${getColumnClass(subField.space)}`}
+                        >
+                          <FormLabel>{subField.label}</FormLabel>
+                          <FormControl>
+                            <FileUploader
+                              field={{
+                                ...subField,
+                                name: `${field.name}.${subField.name}_${index}_${groupIdentifier}`
+                              }}
+                              onFileChange={handleFileChange}
+                              onFileRemove={removeFile}
+                              files={fileStates[`${field.name}.${subField.name}_${index}_${groupIdentifier}`] || []}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
                   <FormField
                     key={`${subField.name}_${index}`}
                     control={form.control}
@@ -375,6 +533,7 @@ const DynamicForm = ({
                       </FormItem>
                     )}
                   />
+                  )
                 ))}
               </div>
               <div className="absolute bottom-0 right-0 flex gap-2">
