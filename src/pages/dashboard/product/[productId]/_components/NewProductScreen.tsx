@@ -32,6 +32,8 @@ const SamplePage = ({ productData }: any) => {
           id: productData.id,
           description: productData.description,
           productQuantity: productData.productQuantity,
+          brand: productData.brand || "",
+          gender: productData.gender || "",
           images: productData.images,
           isWholesaleEnabled: productData.isWholesaleEnabled,
 
