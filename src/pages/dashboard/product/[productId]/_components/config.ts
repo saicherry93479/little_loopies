@@ -1,8 +1,26 @@
+import { db } from "@/lib/db";
+import { categories } from "@/lib/db/schema";
 import type { FormConfig } from "@/types";
 import { actions } from "astro:actions";
 import { z } from "zod";
+import {eq} from 'drizzle-orm'
 
-const dataFromCategories = await actions.getActiveCategories({});
+const dataFromCategories = async ()=>{
+  try {
+    const data = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.active, "Active"));
+    console.log("data categories is ", data);
+    return data.map((category) => ({
+      label: category.name,
+      value: category.name,
+    }));
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return [];
+  }
+}
 
 const categoriesMap = dataFromCategories.data || [];
 export const formConfig: FormConfig = {
