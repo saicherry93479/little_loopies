@@ -5,7 +5,12 @@ import React from "react";
 import { columns, filterFields } from "./columns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const OrderScreen = ({ allOrders = [], writeAccess = false }) => {
+const OrderScreen = ({
+  allOrders = [],
+  writeAccess = false,
+  isStoreUser = false,
+  storeId = "",
+}) => {
   console.log("allOrders ", allOrders);
 
   const [orders, setOrders] = React.useState(allOrders);
@@ -32,9 +37,11 @@ const OrderScreen = ({ allOrders = [], writeAccess = false }) => {
         <Tabs defaultValue={"customer"} className="space-y-4 ">
           <TabsList>
             <TabsTrigger value="customer">Customer Orders</TabsTrigger>
-            <a href="/dashboard/orders/storeorders">
-              <TabsTrigger value="store">Store Orders</TabsTrigger>
-            </a>
+            {isStoreUser ?? (
+              <a href="/dashboard/orders/storeorders">
+                <TabsTrigger value="store">Store Orders</TabsTrigger>
+              </a>
+            )}
           </TabsList>
         </Tabs>
         <DataTable

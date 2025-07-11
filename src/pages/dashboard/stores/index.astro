@@ -16,5 +16,5 @@ const writeAccess = user?.userType === "admin" || permissions?.includes("Stores_
 ---
 
 <DashboardLayout title="Stores">
-  <StoresScreen storesAll={storesData} {writeAccess} client:only />
+  <StoresScreen storesAll={storesData} {writeAccess} client:load />
 </DashboardLayout>

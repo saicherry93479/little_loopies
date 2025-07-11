@@ -7,7 +7,17 @@ import { columns } from "./columns";
 import { DataTable } from "@/components/dashbaord/GlobalTable/data-table";
 
 const StoreScreen = ({ storesAll = [], writeAccess = false }) => {
-  console.log(storesAll);
+  const [data, setData] = React.useState(storesAll);
+  const [selectedStore, setSelectedStore] = React.useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
+
+  const handleStatusUpdate = (storeId: string, newStatus: string) => {
+    const updatedData = data.map((store) =>
+      store.id === storeId ? { ...store, status: newStatus } : store
+    );
+    setData(updatedData);
+  };
+
   return (
     <PageContainer>
       <div className="space-y-4">
@@ -25,8 +35,8 @@ const StoreScreen = ({ storesAll = [], writeAccess = false }) => {
           )}
         </div>
         <DataTable
-          columns={columns}
-          data={storesAll}
+          columns={columns(handleStatusUpdate)}
+          data={data}
           filterFields={[]}
           hiddenColumns={writeAccess ? [] : ["actions"]}
         />

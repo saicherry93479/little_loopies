@@ -11,7 +11,7 @@ import { createOrder, getEligibleStoresAction, getOrderStatusHistory, updateOrde
 import { createPermission, deletePermission, getPermissions, updatePermission } from "./permissions";
 import { checkStock, createProduct, deleteProduct, updateProduct } from "./product";
 import { createUserRole, getActiveRoles, updateUserRole } from "./role";
-import { createStore, deleteStore, sendStoreEmail, updateStore } from "./store";
+import { createStore, deleteStore, sendStoreEmail, updateStore, updateStoreStatus } from "./store";
 import { createUser } from "./user";
 
 export const server = {
@@ -45,6 +45,7 @@ export const server = {
   createUser,
   checkStock,
   getStoreData,
-  subscribeNewsletter
+  subscribeNewsletter,
+  updateStoreStatus
   
 };

@@ -14,12 +14,20 @@ export class ResendProvider implements EmailProvider {
 
   async sendEmail({ to, subject, html, from }: SendEmailParams): Promise<EmailResponse> {
     try {
-      await this.client.emails.send({
+      console.log("sending email to ", to);
+      console.log("from ", this.sender);
+      console.log("subject ", subject);
+      console.log("html ", html);
+      const resp = await this.client.emails.send({
         from: from || this.sender,
         to: Array.isArray(to) ? to : [to],
         subject,
         html: getBaseEmailTemplate(html),
       });
+      console.log("resp in sending email is ", resp);
+      if(resp.error){
+        return { success: false, error: resp.error.message };
+      }
       return { success: true };
     } catch (error) {
       console.error('Failed to send email:', error);

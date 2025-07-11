@@ -169,31 +169,29 @@ export const deleteStore = defineAction({
 // Update store status action
 export const updateStoreStatus = defineAction({
   input: z.object({
-    id: z.string().min(1, "Store ID is required"),
+    id: z.string(),
     status: z.enum(["pending", "active", "suspended", "inactive"]),
   }),
-  handler: async (data) => {
+  handler: async ({ id, status }) => {
     try {
-      return await db.transaction(async (tx) => {
-        await tx
-          .update(store)
-          .set({
-            status: data.status,
-            updatedAt: new Date(),
-          })
-          .where(eq(store.id, data.id));
+      await db
+        .update(store)
+        .set({ 
+          status,
+          updatedAt: new Date()
+        })
+        .where(eq(store.id, id));
 
-        return {
-          success: true,
-          message: "Store status updated successfully",
-        } as const;
-      });
-    } catch (error: any) {
+      return {
+        success: true,
+        message: "Store status updated successfully",
+      };
+    } catch (error) {
       console.error("Error updating store status:", error);
       return {
         success: false,
         message: "Failed to update store status",
-      } as const;
+      };
     }
   },
 });
@@ -205,7 +203,7 @@ export const sendStoreEmail = defineAction({
   }),
   handler: protectedAction(async (inputData: any) => {
     try {
-      const password = generatePassword();
+      const password = await generatePassword();
       const hash = await hashPassword(password);
       await db
         .update(users)
@@ -214,13 +212,15 @@ export const sendStoreEmail = defineAction({
         })
         .where(eq(users.email, inputData.email));
       const resp = await mailSender.sendPasswordEmail(
-        "cherry.workspace.mail@gmail.com",
-        password
+        {
+          email: inputData.email,
+          password: password,
+        }
       );
       console.log("resp is ", resp);
       return { success: false, resp: {} } as const;
     } catch (err) {
-      console.log(err);
+      console.log('error in sendStoreEmail', err);
       return { success: false, resp: {} } as const;
     }
   }),

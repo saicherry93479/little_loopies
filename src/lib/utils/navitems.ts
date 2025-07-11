@@ -24,7 +24,7 @@ export interface NavItem {
   };
   export const navItems: NavItem[] = [
     {
-      title: "Dashboard Page",
+      title: "Dashboard",
       url: "/dashboard",
       icon: "dashboard",
       isActive: false,
@@ -117,6 +117,7 @@ export interface NavItem {
   
 export function getFilteredNavItems(userType: string, permissions: string[]) {
   console.log('usertype is ',userType)
+  console.log('permissions are ',permissions)
   if (userType === "admin") {
     // Admin can see all nav items
     return navItems.map(item => ({
@@ -124,14 +125,16 @@ export function getFilteredNavItems(userType: string, permissions: string[]) {
       show: true
     }));
   }
-
+  console.log(
+    navItems.map(item => ({
+      ...item,
+      show: permissions.includes(`${item}_Read`) ?? false
+    }))
+  )
   // For other users, check specific permissions
   return navItems.map(item => ({
     ...item,
-    show: item.allowedRoles?.some(role => 
-      permissions.includes(`${role}_Read`) || 
-      permissions.includes(`${role}_Write`)
-    ) ?? false
+    show: permissions.includes(`${item.title}_Read`) ?? false
   }));
 }
   

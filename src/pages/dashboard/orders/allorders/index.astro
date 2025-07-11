@@ -86,11 +86,11 @@ console.log("allOrders ", allOrders);
 ---
 
 <DashboardLayout title="allorders">
-  <OrderScreen 
-    writeAccess={writeAccess} 
+  <OrderScreen
+    writeAccess={writeAccess}
     allOrders={allOrders} 
     isStoreUser={Boolean(storeId)}
-    storeId={storeId} 
-    client:load 
+    storeId={storeId}
+    client:load
   />
 </DashboardLayout>

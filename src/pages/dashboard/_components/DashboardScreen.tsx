@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -371,7 +370,9 @@ export default function DashboardScreen({ data=[], storeView=false, stores=[], d
           {!defaultStoreId && (
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="store">Store</TabsTrigger>
+              {
+                !storeView && <TabsTrigger value="store">Store</TabsTrigger>
+              }
             </TabsList>
           )}
 

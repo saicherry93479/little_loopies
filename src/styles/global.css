@@ -25,3 +25,11 @@
   }
 }
 
+.navbar {
+  @apply sticky top-0 z-50 w-full border-b bg-white dark:bg-gray-900 backdrop-blur-sm;
+}
+
+.search-container {
+  @apply relative z-50;
+}
+
