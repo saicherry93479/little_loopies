@@ -93,10 +93,14 @@ const DynamicForm = ({
   const handleFileChange = (fieldName: string, newFiles: FileState[]) => {
     setFileStates((prev) => {
       const existingFiles = prev[fieldName] || [];
-      const newFileStates = newFiles.map((filestate) => ({
-        file: filestate.file,
-        preview: URL.createObjectURL(filestate?.file),
+      // Create a unique identifier for the field to avoid sharing images across variants
+      const uniqueFieldId = fieldName + '-' + Math.random().toString(36).substring(2, 9);
+      
+      const newFileStates = newFiles.map((fileState) => ({
+        file: fileState.file,
+        preview: URL.createObjectURL(fileState?.file),
         isExisting: false,
+        fieldId: uniqueFieldId
       }));
 
       return {
@@ -120,6 +124,10 @@ const DynamicForm = ({
       if (field.type === "dynamicGroup") {
         const groupSchema: Record<string, any> = {};
         const groupIndices = dynamicGroups[field.name] || [0];
+        
+        // Add validation for the dynamic group itself
+        schemaObject[field.name] = field.validation || z.any();
+        
         field.dynamicFields?.forEach((subField) => {
           groupIndices.forEach((index) => {
             groupSchema[`${subField.name}_${index}`] = subField.validation;
@@ -130,9 +138,9 @@ const DynamicForm = ({
         // For nested fields like "storeAddress.street"
         const [parentKey, childKey] = field.name.split(".");
 
-        // Ensure the parent schema is an object
+        // Ensure the parent schema exists as an object
         if (!schemaObject[parentKey]) {
-          schemaObject[parentKey] = z.object({});
+          schemaObject[parentKey] = z.object({}).passthrough();
         }
 
         // Append child validation
@@ -185,7 +193,9 @@ const DynamicForm = ({
       const fileFields = fields.filter((f) => f.type === "file");
       console.log("files are ", fileFields);
       const uploadPromises = fileFields.map(async (field) => {
-        const fieldFiles = fileStates[field.name] || [];
+        // Get files for this specific field
+        const fieldName = field.name;
+        const fieldFiles = fileStates[fieldName] || [];
         console.log(fieldFiles);
         // Only upload new files
         const filesToUpload = fieldFiles
@@ -210,10 +220,10 @@ const DynamicForm = ({
         const allUrls = fieldFiles
           .map((fileState) =>
             !fileState.isExisting ? uploadedUrls.shift() : fileState.preview
-          )
+          ) 
           .filter(Boolean) as string[];
 
-        return { [field.name]: allUrls };
+        return { [fieldName]: allUrls };
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
@@ -225,14 +235,32 @@ const DynamicForm = ({
       // Transform dynamic group values into a more usable format
       const transformedValues = { ...values };
       fields.forEach((field) => {
-        if (field.type === "dynamicGroup") {
+        if (field.type === "dynamicGroup" && field.dynamicFields) {
           const groupData: any[] = [];
           const indices = dynamicGroups[field.name] || [0];
           indices.forEach((index) => {
             const groupItem: any = {};
             field.dynamicFields?.forEach((subField) => {
-              groupItem[subField.name] =
-                transformedValues[field.name][`${subField.name}_${index}`];
+              // Handle nested dynamic groups
+              if (subField.type === "dynamicGroup" && subField.dynamicFields) {
+                const nestedIndices = dynamicGroups[`${field.name}.${subField.name}`] || [0];
+                const nestedItems: any[] = [];
+                
+                nestedIndices.forEach((nestedIndex) => {
+                  const nestedItem: any = {};
+                  subField.dynamicFields?.forEach((nestedField) => {
+                    const key = `${subField.name}_${nestedIndex}_${index}`;
+                    nestedItem[nestedField.name] = transformedValues[field.name]?.[key];
+                  });
+                  nestedItems.push(nestedItem);
+                });
+                
+                groupItem[subField.name] = nestedItems;
+              } else {
+                // Regular field
+                groupItem[subField.name] = 
+                  transformedValues[field.name]?.[`${subField.name}_${index}`];
+              }
             });
             groupData.push(groupItem);
           });

@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { categories } from "@/lib/db/schema";
 import type { FormConfig } from "@/types";
 import { actions } from "astro:actions";
-import { z } from "zod";
+import * as z from "zod";
 import { eq } from 'drizzle-orm';
 
 const dataFromCategories = async () => {
@@ -135,6 +135,7 @@ export const formConfig: FormConfig = {
       name: "colorVariants",
       type: "dynamicGroup",
       label: "Color Variants",
+      validation: z.array(z.any()),
       space: 2,
       dynamicFields: [
         {
@@ -185,6 +186,7 @@ export const formConfig: FormConfig = {
           name: "sizes",
           type: "dynamicGroup",
           label: "Available Sizes",
+          validation: z.array(z.any()),
           space: 2,
           dynamicFields: [
             {
@@ -213,6 +215,7 @@ export const formConfig: FormConfig = {
       name: "pricing",
       type: "dynamicGroup",
       label: "Quantity-based Pricing For Stores",
+      validation: z.array(z.any()),
       space: 2,
       condition: (values) => values.isWholesaleEnabled === "Yes",
       dynamicFields: [
