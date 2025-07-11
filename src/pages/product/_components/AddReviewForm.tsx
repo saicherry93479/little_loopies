@@ -1,15 +1,15 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { X } from 'lucide-react'
 
 interface AddReviewFormProps {
   onClose: () => void
   onSubmit: (review: {
-    user: string
     rating: number
-    date: string
     title: string
     content: string
-    isVerified: boolean
-    helpfulCount: number
   }) => void
 }
 
@@ -17,24 +17,52 @@ export function AddReviewForm({ onClose, onSubmit }: AddReviewFormProps) {
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<{
+    title?: string;
+    content?: string;
+  }>({})
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
-      user: "Anonymous User",
-      rating,
-      date: new Date().toISOString(),
-      title,
-      content,
-      isVerified: true,
-      helpfulCount: 0
-    })
+    
+    // Validate form
+    const newErrors: {title?: string; content?: string} = {}
+    if (!title.trim()) newErrors.title = 'Title is required'
+    if (!content.trim()) newErrors.content = 'Review content is required'
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    
+    setIsSubmitting(true)
+    
+    try {
+      await onSubmit({
+        rating,
+        title,
+        content
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white p-6 rounded-lg w-full max-w-xl">
-        <h3 className="text-xl font-medium mb-4">Write a Review</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-medium">Write a Review</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Rating</label>
@@ -44,7 +72,7 @@ export function AddReviewForm({ onClose, onSubmit }: AddReviewFormProps) {
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
-                  className={`text-2xl ${star <= rating ? 'text-black' : 'text-gray-300'}`}
+                  className={`text-2xl ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
                 >
                   ★
                 </button>
@@ -54,42 +82,51 @@ export function AddReviewForm({ onClose, onSubmit }: AddReviewFormProps) {
 
           <div>
             <label className="block text-sm font-medium mb-1">Title</label>
-            <input
+            <Input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border rounded-md px-3 py-2"
-              required
+              onChange={(e) => {
+                setTitle(e.target.value)
+                if (errors.title) setErrors({...errors, title: undefined})
+              }}
+              className={errors.title ? "border-red-500" : ""}
+              placeholder="Summarize your experience"
             />
+            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Review</label>
-            <textarea
+            <Textarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 h-32"
-              required
+              onChange={(e) => {
+                setContent(e.target.value)
+                if (errors.content) setErrors({...errors, content: undefined})
+              }}
+              className={`min-h-[120px] ${errors.content ? "border-red-500" : ""}`}
+              placeholder="Share your experience with this product"
             />
+            {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content}</p>}
           </div>
 
-          <div className="flex justify-end gap-4">
-            <button
+          <div className="flex justify-end gap-4 pt-2">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-900"
+              disabled={isSubmitting}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+              disabled={isSubmitting}
             >
-              Submit Review
-            </button>
+              {isSubmitting ? 'Submitting...' : 'Submit Review'}
+            </Button>
           </div>
         </form>
       </div>
     </div>
   )
-} 
+}

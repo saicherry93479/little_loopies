@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/lib/store/auth'
 import { actions } from 'astro:actions'
 import { useToast } from '@/hooks/use-toast'
+import { ThumbsUp } from 'lucide-react'
+
 interface ReviewCardProps {
   review: {
     user: string
@@ -68,6 +71,7 @@ export function ReviewCard({ review, productId }: ReviewCardProps) {
       setIsLoading(false)
     }
   }
+  
   return (
     <div className="border-b border-gray-200 pb-6">
       <div className="flex justify-between items-start mb-2">
@@ -76,7 +80,7 @@ export function ReviewCard({ review, productId }: ReviewCardProps) {
           <div className="flex gap-2 items-center text-sm text-gray-600">
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map(star => (
-                <span key={star} className={star <= review.rating ? 'text-black' : 'text-gray-300'}>
+                <span key={star} className={star <= review.rating ? 'text-yellow-400' : 'text-gray-300'}>
                   ★
                 </span>
               ))}
@@ -98,15 +102,14 @@ export function ReviewCard({ review, productId }: ReviewCardProps) {
 
       <p className="text-gray-700 mb-4">{review.content}</p>
 
-      <button className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2">
+      <button 
         className={`text-sm ${isHelpful ? 'text-blue-600' : 'text-gray-600'} hover:text-gray-900 flex items-center gap-2`}
         onClick={handleHelpfulClick}
         disabled={isLoading}
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-        </svg>
-        Helpful ({helpfulCount})
+      >
+        <ThumbsUp className="h-4 w-4" />
+        <span>Helpful ({helpfulCount})</span>
       </button>
     </div>
   )
-import { useState, useEffect } from 'react'
-} 
+}

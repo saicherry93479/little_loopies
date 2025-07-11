@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User, ShoppingBag, Heart } from "lucide-react";
+import { LogOut, User, ShoppingBag, Heart, UserCircle } from "lucide-react";
 
 export function UserMenu() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -16,7 +16,11 @@ export function UserMenu() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Check authentication status on mount
+    if (mounted) {
+      useAuthStore.getState().checkAuth();
+    }
+  }, [mounted]);
 
   if (!mounted) {
     return (
@@ -26,8 +30,8 @@ export function UserMenu() {
 
   if (!isAuthenticated) {
     return (
-      <a href="/auth/login" className="flex items-center gap-2">
-        <User className="w-5 h-5" />
+      <a href="/auth/login" className="flex items-center gap-2 text-gray-800 hover:text-gray-600">
+        <UserCircle className="w-5 h-5" />
         <span className="hidden md:inline">Sign In</span>
       </a>
     );

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { reviews, reviewHelpfulVotes } from "@/lib/db/schema";
 import { defineAction } from "astro:actions";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedAction } from "./utils";
 

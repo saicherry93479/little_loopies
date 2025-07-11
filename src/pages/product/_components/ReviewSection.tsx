@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ReviewCard } from './ReviewCard'
 import { AddReviewForm } from './AddReviewForm'
 import { useAuthStore } from '@/lib/store/auth'
@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast'
 import { actions } from 'astro:actions'
 
 interface Review {
-  id: number
+  id: string
   user: string
   rating: number
   date: string
@@ -16,7 +16,6 @@ interface Review {
   isVerified: boolean
   helpfulCount: number
 }
-
 
 export function ReviewSection({ productId }: { productId?: string }) {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -38,7 +37,7 @@ export function ReviewSection({ productId }: { productId?: string }) {
     try {
       const response = await actions.getProductReviews({ productId })
       if (response.data.success) {
-        setReviews(response.data.reviews.map(review => ({
+        setReviews(response.data.reviews.map((review: any) => ({
           id: review.id,
           user: review.userName,
           rating: review.rating,
@@ -56,9 +55,11 @@ export function ReviewSection({ productId }: { productId?: string }) {
     }
   }
 
-  const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length 
+    : 0
 
-  const handleSubmitReview = async (newReview) => {
+  const handleSubmitReview = async (newReview: any) => {
     if (!productId) return
     
     try {
@@ -91,16 +92,17 @@ export function ReviewSection({ productId }: { productId?: string }) {
       })
     }
   }
+  
   return (
-    <section className="py-12">
-      <div className="max-w-[1600px] mx-auto px-4">
+    <section className="py-12 border-t mt-12">
+      <div className="max-w-[1200px] mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-medium mb-2">Customer Reviews</h2>
             <div className="flex items-center gap-2">
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <span key={star} className={`text-xl ${star <= averageRating ? 'text-black' : 'text-gray-300'}`}>★</span>
+                  <span key={star} className={`text-xl ${star <= averageRating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
                 ))}
               </div>
               <span className="text-lg">({reviews.length})</span>
@@ -153,4 +155,4 @@ export function ReviewSection({ productId }: { productId?: string }) {
       </div>
     </section>
   )
-} 
+}

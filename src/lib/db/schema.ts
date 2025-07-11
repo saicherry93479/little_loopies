@@ -638,6 +638,18 @@ export const reviews = sqliteTable("reviews", {
   ),
 });
 
+// Add reviews relations
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  product: one(products, {
+    fields: [reviews.productId],
+    references: [products.id],
+  }),
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
+}));
+
 // Helpful votes for reviews
 export const reviewHelpfulVotes = sqliteTable("review_helpful_votes", {
   id: text("id")
@@ -653,6 +665,18 @@ export const reviewHelpfulVotes = sqliteTable("review_helpful_votes", {
     () => new Date()
   ),
 });
+
+// Add review helpful votes relations
+export const reviewHelpfulVotesRelations = relations(reviewHelpfulVotes, ({ one }) => ({
+  review: one(reviews, {
+    fields: [reviewHelpfulVotes.reviewId],
+    references: [reviews.id],
+  }),
+  user: one(users, {
+    fields: [reviewHelpfulVotes.userId],
+    references: [users.id],
+  }),
+}));
 
 // Coupons schema
 export const coupons = sqliteTable("coupons", {
