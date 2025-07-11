@@ -614,6 +614,93 @@ export const newsletterSubscriptions = sqliteTable("newsletter_subscriptions", {
   ),
 });
 
+// Reviews schema
+export const reviews = sqliteTable("reviews", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  isVerified: integer("is_verified", { mode: "boolean" }).default(false),
+  helpfulCount: integer("helpful_count").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+// Helpful votes for reviews
+export const reviewHelpfulVotes = sqliteTable("review_helpful_votes", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  reviewId: text("review_id")
+    .notNull()
+    .references(() => reviews.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+// Coupons schema
+export const coupons = sqliteTable("coupons", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  code: text("code").notNull().unique(),
+  description: text("description"),
+  discount: real("discount").notNull(),
+  type: text("type", { enum: ["percentage", "fixed", "shipping"] }).notNull(),
+  minPurchase: real("min_purchase"),
+  maxUses: integer("max_uses"),
+  usedCount: integer("used_count").default(0),
+  category: text("category"),
+  status: text("status", { enum: ["active", "expired", "scheduled"] }).notNull().default("active"),
+  expiryDate: integer("expiry_date", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
+// Product variants for different colors and sizes
+export const productVariants = sqliteTable("product_variants", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  productId: text("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  color: text("color").notNull(),
+  size: text("size").notNull(),
+  price: real("price").notNull(),
+  discountPercentage: real("discount_percentage").default(0),
+  stock: integer("stock").notNull().default(0),
+  images: text("images", { mode: "json" }).$type<string[]>(),
+  sku: text("sku"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+});
+
 export type User = InferSelectModel<typeof users>;
 export type StoreUser = InferSelectModel<typeof store>;
 export type Role = InferSelectModel<typeof roles>;
@@ -627,3 +714,7 @@ export type OrderItem = InferSelectModel<typeof orderItems>;
 export type OrderStatusHistoryEntry = InferSelectModel<
   typeof orderStatusHistory
 >;
+export type Review = InferSelectModel<typeof reviews>;
+export type ReviewHelpfulVote = InferSelectModel<typeof reviewHelpfulVotes>;
+export type Coupon = InferSelectModel<typeof coupons>;
+export type ProductVariant = InferSelectModel<typeof productVariants>;

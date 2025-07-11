@@ -5,20 +5,20 @@ const heroImages = [
   {
     id: 1,
     url: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=1600&h=900",
-    title: "Back to School Collection",
-    subtitle: "Fun & colorful outfits for your little ones"
+    title: "Kids Summer Collection",
+    subtitle: "Bright & playful outfits for your little adventurers"
   },
   {
     id: 2,
-    url: "https://images.unsplash.com/photo-1472162072942-cd5147eb3902?w=1600&h=900",
-    title: "Playtime Ready",
-    subtitle: "Comfortable & durable clothes for active kids"
+    url: "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=1600&h=900",
+    title: "Baby Essentials",
+    subtitle: "Soft & gentle clothing for your precious little ones"
   },
   {
     id: 3,
-    url: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=1600&h=900",
-    title: "Adventure Awaits",
-    subtitle: "Explore our new collection of kids' outdoor wear"
+    url: "https://images.unsplash.com/photo-1472162072942-cd5147eb3902?w=1600&h=900",
+    title: "Toddler Favorites",
+    subtitle: "Durable & comfortable clothes for your active little explorers"
   }
 ]
 

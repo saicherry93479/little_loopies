@@ -2,53 +2,53 @@ import { useState } from 'react'
 
 const navItems = [
   { 
-    label: 'Sale', 
+    label: 'Kids Sale', 
     color: 'text-red-700',
-    items: ['Women', 'Men', 'Kids', 'Home', 'Beauty'] 
+    items: ['Baby', 'Toddler', 'Kids', 'Shoes', 'Accessories'] 
   },
   { 
-    label: 'New',
-    items: ['New Arrivals', 'What\'s Trending', 'Best Sellers'] 
+    label: 'New Arrivals',
+    items: ['Baby Collection', 'Toddler Collection', 'Kids Collection', 'Seasonal Favorites'] 
   },
   { 
-    label: 'Women',
-    items: ['Clothing', 'Shoes', 'Handbags', 'Jewelry', 'Beauty'] 
+    label: 'Baby (0-12m)',
+    items: ['Bodysuits', 'Rompers', 'Sleepwear', 'Sets', 'Accessories'] 
   },
   { 
-    label: 'Men',
-    items: ['Clothing', 'Shoes', 'Accessories', 'Grooming'] 
+    label: 'Toddler (1-3y)',
+    items: ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Sleepwear'] 
   },
   { 
-    label: 'Beauty',
-    items: ['Makeup', 'Skincare', 'Haircare', 'Fragrance'] 
+    label: 'Kids (4-14y)',
+    items: ['Boys', 'Girls', 'Unisex', 'School Uniforms', 'Special Occasions'] 
   },
   { 
-    label: 'Shoes',
-    items: ['Women\'s Shoes', 'Men\'s Shoes', 'Kids\' Shoes'] 
+    label: 'Shoes & Accessories',
+    items: ['Baby Shoes', 'Toddler Shoes', 'Kids Shoes', 'Socks', 'Hats', 'Bags'] 
   },
   { 
-    label: 'Accessories',
-    items: ['Handbags', 'Jewelry', 'Watches', 'Sunglasses','Handbags', 'Jewelry', 'Watches', 'Sunglasses','Handbags', 'Jewelry', 'Watches', 'Sunglasses','Handbags', 'Jewelry', 'Watches', 'Sunglasses'] 
+    label: 'Collections',
+    items: ['Organic Cotton', 'Dinosaur Collection', 'Animal Friends', 'Seasonal', 'Character Favorites', 'Matching Family'] 
   },
   { 
-    label: 'Kids',
-    items: ['Girls', 'Boys', 'Baby', 'Toys'] 
+    label: 'Occasions',
+    items: ['Everyday Play', 'Birthday', 'Holiday', 'Special Events', 'Sleepwear'] 
   },
   { 
-    label: 'Designer',
-    items: ['Women', 'Men', 'Kids', 'Accessories'] 
-  },
-  { 
-    label: 'Home',
-    items: ['Bedding', 'Bath', 'Decor', 'Kitchen'] 
+    label: 'Brands',
+    items: ['Little Loopies', 'Carter\'s', 'OshKosh', 'Gap Kids', 'Disney'] 
   },
   { 
     label: 'Gifts',
-    items: ['For Her', 'For Him', 'For Kids', 'For Home'] 
+    items: ['Baby Shower', 'Birthday', 'Holiday', 'Gift Sets', 'Gift Cards'] 
+  },
+  { 
+    label: 'Sale',
+    items: ['Clearance', 'Special Offers', 'Bundle Deals', 'Seasonal Sale'] 
   },
   { 
     label: 'Explore',
-    items: ['Sale', 'New Arrivals', 'Trending Now'] 
+    items: ['New Arrivals', 'Bestsellers', 'Trending Now', 'Eco-Friendly'] 
   },
 ]
 

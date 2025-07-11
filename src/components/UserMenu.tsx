@@ -18,7 +18,11 @@ export function UserMenu() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

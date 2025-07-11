@@ -102,6 +102,15 @@ export interface NavItem {
       badge: "",
       items: [],
     },
+   {
+     title: "Coupons",
+     url: "/dashboard/coupons",
+     icon: "product",
+     isActive: false,
+     allowedRoles: ["admin", "manager"],
+     badge: "",
+     items: [],
+   },
     {
       title: "Invoices",
       url: "/dashboard/invoices",

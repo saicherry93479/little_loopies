@@ -12,7 +12,7 @@ export function Navbar() {
   const wishlistItemsCount = useWishlistStore((state) => state.items.length);
 
   return (
-    <header className="w-full bg-white">
+    <header className="w-full bg-white sticky top-0 z-50">
       {/* Top black banner */}
       <TopBar />
 
@@ -22,11 +22,6 @@ export function Navbar() {
           {/* Logo */}
           <a href="/" className="w-[198px]">
             <h1 className="text-3xl font-bold">LITTLE LOOPIES</h1>
-            {/* <img 
-              src="/nordstrom-logo.svg" 
-              alt="Nordstrom" 
-              className="h-6 md:h-8"
-            /> */}
           </a>
 
           {/* Search bar */}

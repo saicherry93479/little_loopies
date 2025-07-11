@@ -9,27 +9,29 @@ const getProductById = (id: string) => {
   // This would be replaced with an actual API call
   return {
     id,
-    name: "Premium Cotton T-Shirt",
+    name: "Dinosaur Print Kids T-Shirt",
     brand: "Little Loopies",
-    description: "Our premium cotton t-shirt is made from 100% organic cotton, providing exceptional comfort and durability. Perfect for everyday wear, this versatile piece features a classic fit and comes in a variety of colors to match any style.",
-    price: 1499.99,
-    originalPrice: 1999.99,
+    description: "Our adorable dinosaur print t-shirt is made from 100% organic cotton, providing exceptional comfort and durability for your little one. Perfect for everyday play, this fun piece features a classic fit and vibrant colors that kids love.",
+    price: 599.99,
+    originalPrice: 799.99,
     discount: 25,
     rating: 4.8,
     reviews: 124,
     images: [
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=1000",
-      "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=800&h=1000",
-      "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&h=1000"
+      "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&h=1000",
+      "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&h=1000",
+      "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=800&h=1000"
     ],
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: ["Black", "White", "Navy", "Gray", "Red"],
+    sizes: ["0-3 months", "3-6 months", "6-9 months", "9-12 months", "1-2 years", "2-3 years"],
+    colors: ["Blue", "Green", "Yellow", "Red", "Orange"],
     inStock: true,
     features: [
       "100% organic cotton",
       "Breathable fabric",
       "Machine washable",
-      "Sustainable production"
+      "Sustainable production",
+      "Gentle on sensitive skin",
+      "Fun dinosaur print design"
     ]
   };
 };
@@ -42,6 +44,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
+  const [currentVariant, setCurrentVariant] = useState<any>(null);
   
   const { addItem: addToCart } = useCartStore();
   const { addItem: addToWishlist, isInWishlist } = useWishlistStore();
@@ -55,34 +58,47 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
     setTimeout(() => {
       const productData = getProductById(productId);
       setProduct(productData);
+      // Set default variant if available
+      if (productData.variants && productData.variants.length > 0) {
+        setCurrentVariant(productData.variants[0]);
+      }
       setLoading(false);
     }, 800);
   }, [productId]);
   
   useEffect(() => {
     if (!loading && product && productRef.current) {
-      const ctx = gsap.context(() => {
-        // Product images animation
-        gsap.from(imageRefs.current[currentImageIndex], {
-          opacity: 0,
-          scale: 1.05,
-          duration: 0.5,
-          ease: "power2.out",
-        });
+      // Initial animation only when product first loads
+      if (!product.animatedInitially) {
+        const ctx = gsap.context(() => {
+          // Product details animation
+          gsap.from(".product-details > *", {
+            opacity: 0,
+            x: 30,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power2.out",
+          });
+        }, productRef);
         
-        // Product details animation
-        gsap.from(".product-details > *", {
-          opacity: 0,
-          x: 30,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
-        });
-      }, productRef);
-      
-      return () => ctx.revert();
+        product.animatedInitially = true;
+        return () => ctx.revert();
+      }
     }
-  }, [loading, product, currentImageIndex]);
+  }, [loading, product]);
+  
+  useEffect(() => {
+    // Update price and images when variant changes
+    if (selectedColor && selectedSize && product?.variants) {
+      const variant = product.variants.find(
+        v => v.color === selectedColor && v.size === selectedSize
+      );
+      
+      if (variant) {
+        setCurrentVariant(variant);
+      }
+    }
+  }, [selectedColor, selectedSize, product]);
   
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -98,7 +114,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: currentVariant?.price || product.price,
       quantity,
       image: product.images[0],
       brand: product.brand
@@ -276,7 +292,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
             <div className="flex items-center gap-4">
               <span className="text-2xl font-medium">₹{product.price.toFixed(2)}</span>
               <span className="text-lg text-gray-500 line-through">
-                ₹{product.originalPrice.toFixed(2)}
+                ₹{(currentVariant?.originalPrice || product.originalPrice).toFixed(2)}
               </span>
               <span className="text-sm text-green-600 font-medium">
                 {product.discount}% OFF
@@ -289,7 +305,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
             <div>
               <label className="block text-sm font-medium mb-2">Size</label>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
+                {product.sizes?.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -308,7 +324,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
             <div>
               <label className="block text-sm font-medium mb-2">Color</label>
               <div className="flex flex-wrap gap-2">
-                {product.colors.map((color) => (
+                {product.colors?.map((color) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
@@ -370,7 +386,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
             
             <h3 className="font-medium mt-4 mb-2">Features:</h3>
             <ul className="list-disc pl-5 space-y-1">
-              {product.features.map((feature, index) => (
+              {product.features?.map((feature, index) => (
                 <li key={index} className="text-gray-700">{feature}</li>
               ))}
             </ul>

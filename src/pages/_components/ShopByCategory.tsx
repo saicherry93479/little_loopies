@@ -6,34 +6,34 @@ gsap.registerPlugin(ScrollTrigger)
 
 const categories = [
   {
-    title: "Women",
-    slug: "women",
-    image: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=500&h=700",
+    title: "Baby (0-12m)",
+    slug: "baby",
+    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&h=700",
   },
   {
-    title: "Men",
-    slug: "men",
-    image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=500&h=700",
+    title: "Toddler (1-3y)",
+    slug: "toddler",
+    image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=500&h=700",
   },
   {
-    title: "Kids",
-    slug: "kids",
+    title: "Kids (4-7y)",
+    slug: "kids-4-7",
     image: "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=500&h=700",
   },
   {
-    title: "Designer",
-    slug: "designer",
-    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&h=700",
+    title: "Older Kids (8-14y)",
+    slug: "kids-8-14",
+    image: "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=500&h=700",
   },
   {
-    title: "Home",
-    slug: "home",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&h=700",
+    title: "Shoes",
+    slug: "kids-shoes",
+    image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=500&h=700",
   },
   {
-    title: "Beauty & Fragrance",
-    slug: "beauty",
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&h=700",
+    title: "Accessories",
+    slug: "kids-accessories",
+    image: "https://images.unsplash.com/photo-1617006097724-d751b0c75adf?w=500&h=700",
   },
 ]
 

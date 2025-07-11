@@ -1,0 +1,19 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import CouponsScreen from "./_components/CouponsScreen";
+import { mockCoupons } from "./_components/mockData";
+
+const { permissions, user } = Astro.locals;
+
+// Admin bypass permission check
+if (user?.userType !== "admin" && !permissions?.includes("Coupons_Read")) {
+  return Astro.redirect("/dashboard/no-access", 302);
+}
+
+// Admin always has write access
+const writeAccess = user?.userType === "admin" || permissions?.includes("Coupons_Write");
+---
+
+<DashboardLayout title="Coupons">
+  <CouponsScreen coupons={mockCoupons} writeAccess={writeAccess} client:load />
+</DashboardLayout>

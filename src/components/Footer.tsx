@@ -4,20 +4,20 @@ const customerServiceas = [
   { label: 'Order Status', href: '/orders' },
   { label: 'Shipping', href: '/shipping' },
   { label: 'Return Policy & Exchanges', href: '/returns' },
-  { label: 'Price Adjustments', href: '/price-adjustments' },
+  { label: 'Size Guide', href: '/size-guide' },
   { label: 'Gift Cards', href: '/gift-cards' },
   { label: 'FAQ', href: '/faq' },
-  { label: 'Product Recalls', href: '/recalls' }
+  { label: 'Care Instructions', href: '/care' }
 ]
 
 const aboutas = [
-  { label: 'All Brands', href: '/brands' },
-  { label: 'Careers', href: '/careers' },
-  { label: 'Corporate Social Responsibility', href: '/csr' },
-  { label: 'Diversity, Inclusion & Belonging', href: '/diversity' },
+  { label: 'Our Story', href: '/about' },
+  { label: 'Sustainability', href: '/sustainability' },
+  { label: 'Organic Materials', href: '/organic' },
+  { label: 'Safety Standards', href: '/safety' },
   { label: 'Get Email Updates', href: '/email-signup' },
-  { label: 'Nordstrom Blog', href: '/blog' },
-  { label: 'Nordy Podcast', href: '/podcast' },
+  { label: 'Little Loopies Blog', href: '/blog' },
+  { label: 'Parenting Tips', href: '/parenting-tips' },
   { label: 'Store Location', href: '/stores' }
 ]
 
