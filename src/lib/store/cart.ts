@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useAuthStore } from "./auth";
 
 export interface CartItem {
   id: string;
@@ -25,21 +26,46 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       
-      addItem: (item) => set((state) => {
-        const existingItem = state.items.find((i) => i.id === item.id);
+      addItem: (item) => {
+        // Check if user is authenticated for checkout
+        const { isAuthenticated } = useAuthStore.getState();
         
-        if (existingItem) {
-          return {
-            items: state.items.map((i) => 
-              i.id === item.id 
-                ? { ...i, quantity: i.quantity + item.quantity }
-                : i
-            ),
-          };
+        if (!isAuthenticated) {
+          // Store the item temporarily but prompt login for checkout
+          set((state) => {
+            const existingItem = state.items.find((i) => i.id === item.id);
+            
+            if (existingItem) {
+              return {
+                items: state.items.map((i) => 
+                  i.id === item.id 
+                    ? { ...i, quantity: i.quantity + item.quantity }
+                    : i
+                ),
+              };
+            }
+            
+            return { items: [...state.items, item] };
+          });
+          return;
         }
         
-        return { items: [...state.items, item] };
-      }),
+        set((state) => {
+          const existingItem = state.items.find((i) => i.id === item.id);
+          
+          if (existingItem) {
+            return {
+              items: state.items.map((i) => 
+                i.id === item.id 
+                  ? { ...i, quantity: i.quantity + item.quantity }
+                  : i
+              ),
+            };
+          }
+          
+          return { items: [...state.items, item] };
+        });
+      },
       
       removeItem: (id) => set((state) => ({
         items: state.items.filter((item) => item.id !== id),

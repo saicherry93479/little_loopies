@@ -40,9 +40,13 @@ export const login = defineAction({
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       await db.insert(sessions).values({
-        userId: user[0].id,
-        accessToken,
-        expiresAt: expiresAt,
+        userId: user[0].id, 
+        accessToken, 
+        expiresAt: expiresAt, 
+        createdAt: new Date(),
+        lastUsedAt: new Date(),
+        userAgent: undefined,
+        ipAddress: "unknown"
       });
 
       cookies.set(

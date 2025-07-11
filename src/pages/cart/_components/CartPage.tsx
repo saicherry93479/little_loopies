@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
+import { useAuthStore } from '@/lib/store/auth';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   
   const handleCheckout = () => {
+    if (!isAuthenticated) {
+      window.location.href = `/auth/login?returnUrl=${encodeURIComponent('/checkout')}`;
+      return;
+    }
+    
     setIsCheckingOut(true);
     // Simulate checkout process
     setTimeout(() => {
@@ -114,9 +121,9 @@ export default function CartPage() {
           <button 
             onClick={handleCheckout}
             disabled={isCheckingOut}
-            className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400"
+            className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 flex justify-center items-center"
           >
-            {isCheckingOut ? 'Processing...' : 'Checkout'}
+            {isCheckingOut ? 'Processing...' : isAuthenticated ? 'Checkout' : 'Login to Checkout'}
           </button>
           
           <div className="mt-4">

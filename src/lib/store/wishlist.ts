@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useAuthStore } from "./auth";
 
 export interface WishlistItem {
   id: string;
@@ -22,15 +23,26 @@ export const useWishlistStore = create<WishlistStore>()(
     (set, get) => ({
       items: [],
       
-      addItem: (item) => set((state) => {
-        const existingItem = state.items.find((i) => i.id === item.id);
+      addItem: (item) => {
+        // Check if user is authenticated
+        const { isAuthenticated } = useAuthStore.getState();
         
-        if (existingItem) {
-          return state;
+        if (!isAuthenticated) {
+          // Redirect to login if not authenticated
+          window.location.href = `/auth/login?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+          return;
         }
         
-        return { items: [...state.items, item] };
-      }),
+        set((state) => {
+          const existingItem = state.items.find((i) => i.id === item.id);
+          
+          if (existingItem) {
+            return state;
+          }
+          
+          return { items: [...state.items, item] };
+        });
+      },
       
       removeItem: (id) => set((state) => ({
         items: state.items.filter((item) => item.id !== id),

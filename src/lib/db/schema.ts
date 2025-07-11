@@ -45,11 +45,19 @@ export const sessions = sqliteTable("sessions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id").references(() => users.id),
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
 
   accessToken: text("access_token").notNull(),
 
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  lastUsedAt: integer("last_used_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
 });
 export const permissions = sqliteTable("permissions", {
   id: text("id")

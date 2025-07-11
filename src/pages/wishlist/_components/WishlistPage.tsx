@@ -1,5 +1,6 @@
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useCartStore } from '@/lib/store/cart';
+import { AuthGuard } from '@/components/AuthGuard';
 import { useState } from 'react';
 
 export default function WishlistPage() {
@@ -24,6 +25,7 @@ export default function WishlistPage() {
 
   if (items.length === 0) {
     return (
+      <AuthGuard>
       <div className="max-w-[1200px] mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold mb-6">Your Wishlist</h1>
         <div className="bg-gray-50 rounded-lg p-8">
@@ -36,10 +38,12 @@ export default function WishlistPage() {
           </a>
         </div>
       </div>
+      </AuthGuard>
     );
   }
 
   return (
+    <AuthGuard>
     <div className="max-w-[1200px] mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Your Wishlist</h1>
       
@@ -85,5 +89,6 @@ export default function WishlistPage() {
         ))}
       </div>
     </div>
+    </AuthGuard>
   );
 }

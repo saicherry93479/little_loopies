@@ -3,6 +3,7 @@ import { users, type User } from "@/lib/db/schema";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { logger } from "./logger";
+import { authMiddleware } from "./auth";
 import type { AstroCookies } from "astro";
 
 
@@ -75,4 +76,4 @@ const auth = defineMiddleware(
   }
 );
 
-export const onRequest = sequence(logger, auth);
+export const onRequest = sequence(logger, auth, authMiddleware);

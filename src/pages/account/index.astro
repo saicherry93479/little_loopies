@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AccountPage from "./_components/AccountPage";
+
+// Redirect is handled by middleware if not authenticated
+---
+
+<Layout>
+  <AccountPage client:load />
+</Layout>
