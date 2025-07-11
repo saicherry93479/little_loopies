@@ -28,3 +28,4 @@ pnpm-debug.log*
 .cursorrules
 bun.lockb
 package-lock.json
+migrations/
