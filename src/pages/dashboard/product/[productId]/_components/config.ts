@@ -19,6 +19,16 @@ export const formConfig: FormConfig = {
       space: 1, // Takes half width
     },
     {
+      name: "brand",
+      type: "input",
+      validation: z.string().min(2, {
+        message: "Brand name must be at least 2 characters.",
+      }),
+      label: "Brand Name",
+      placeholder: "Enter brand name",
+      space: 1,
+    },
+    {
       name: "productQuantity",
       type: "input",
       inputType: "number",
@@ -37,6 +47,19 @@ export const formConfig: FormConfig = {
       label: "Category",
       placeholder: "Select category",
       options: categoriesMap,
+      space: 1,
+    },
+    {
+      name: "gender",
+      type: "select",
+      validation: z.string().optional(),
+      label: "Gender",
+      placeholder: "Select gender",
+      options: [
+        { label: "Boy", value: "Boy" },
+        { label: "Girl", value: "Girl" },
+        { label: "Unisex", value: "Unisex" },
+      ],
       space: 1,
     },
     {

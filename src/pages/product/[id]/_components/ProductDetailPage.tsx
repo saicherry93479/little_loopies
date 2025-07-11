@@ -1,77 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
+import { actions } from 'astro:actions';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { ReviewSection } from '../../_components/ReviewSection';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock product data - in a real app, you would fetch this from an API
-const getProductById = (id: string) => {
-  // This would be replaced with an actual API call
-  return {
-    id,
-    name: "Dinosaur Print Kids T-Shirt",
-    brand: "Little Loopies",
-    description: "Our adorable dinosaur print t-shirt is made from 100% organic cotton, providing exceptional comfort and durability for your little one. Perfect for everyday play, this fun piece features a classic fit and vibrant colors that kids love.",
-    price: 599.99,
-    originalPrice: 799.99,
-    discount: 25,
-    rating: 4.8,
-    reviews: 124,
-    images: [
-      "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&h=1000",
-      "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&h=1000",
-      "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=800&h=1000"
-    ],
-    sizes: ["0-3 months", "3-6 months", "6-9 months", "9-12 months", "1-2 years", "2-3 years"],
-    colors: ["Blue", "Green", "Yellow", "Red", "Orange"],
-    variants: [
-      {
-        color: "Blue",
-        size: "0-3 months",
-        price: 599.99,
-        originalPrice: 799.99,
-        stock: 15,
-        images: [
-          "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&h=1000",
-          "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&h=1000"
-        ]
-      },
-      {
-        color: "Green",
-        size: "0-3 months",
-        price: 599.99,
-        originalPrice: 799.99,
-        stock: 10,
-        images: [
-          "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?w=800&h=1000",
-          "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&h=1000"
-        ]
-      },
-      {
-        color: "Blue",
-        size: "3-6 months",
-        price: 649.99,
-        originalPrice: 849.99,
-        stock: 8,
-        images: [
-          "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=800&h=1000",
-          "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&h=1000"
-        ]
-      }
-    ],
-    inStock: true,
-    features: [
-      "100% organic cotton",
-      "Breathable fabric",
-      "Machine washable",
-      "Sustainable production",
-      "Gentle on sensitive skin",
-      "Fun dinosaur print design"
-    ]
-  };
-};
 
 export default function ProductDetailPage({ productId }: { productId: string }) {
   const [product, setProduct] = useState<any>(null);
@@ -79,6 +13,8 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
   const [currentVariant, setCurrentVariant] = useState<any>(null);
@@ -92,10 +28,15 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
   
   useEffect(() => {
     // Fetch product data
-    const fetchProduct = async () => {
+    const fetchProductData = async () => {
       try {
         // In a real app, this would be an API call
-        const productData = getProductById(productId);
+        const response = await fetch(`/api/products/${productId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch product');
+        }
+        
+        const productData = await response.json();
         setProduct(productData);
         
         // Set default selections
@@ -105,10 +46,19 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
         if (productData.sizes.length > 0) {
           setSelectedSize(productData.sizes[0]);
         }
+        if (productData.genders && productData.genders.length > 0) {
+          setSelectedGender(productData.genders[0]);
+        }
+        if (productData.brand) {
+          setSelectedBrand(productData.brand);
+        }
         
         // Find the matching variant
         const variant = productData.variants.find(
-          (v: any) => v.color === productData.colors[0] && v.size === productData.sizes[0]
+          (v: any) => 
+            v.color === productData.colors[0] && 
+            v.size === productData.sizes[0] &&
+            (!v.gender || v.gender === (productData.genders?.[0] || ''))
         );
         if (variant) {
           setCurrentVariant(variant);
@@ -121,7 +71,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
       }
     };
     
-    fetchProduct();
+    fetchProductData();
   }, [productId]);
   
   useEffect(() => {
@@ -130,6 +80,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
     // Find the matching variant when selections change
     const variant = product.variants.find(
       (v: any) => v.color === selectedColor && v.size === selectedSize
+        && (!v.gender || v.gender === selectedGender)
     );
     
     if (variant) {
@@ -171,15 +122,15 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
       id: `${product.id}-${selectedColor}-${selectedSize}`,
       name: product.name,
       price: currentVariant.price,
+      brand: selectedBrand || product.brand,
       quantity,
       image: currentVariant.images[0] || product.images[0],
-      brand: product.brand,
-      variant: `${selectedColor}, ${selectedSize}`
+      variant: `${selectedColor}, ${selectedSize}${selectedGender ? `, ${selectedGender}` : ''}`
     });
     
     toast({
       title: "Added to cart",
-      description: `${product.name} (${selectedColor}, ${selectedSize}) added to your cart`
+      description: `${product.name} (${selectedColor}, ${selectedSize}${selectedGender ? `, ${selectedGender}` : ''}) added to your cart`
     });
   };
   
@@ -334,7 +285,7 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
           </div>
           
           {/* Color Selection */}
-          <div className="animate-in">
+          <div className="animate-in space-y-2">
             <h3 className="text-sm font-medium mb-2">Color: {selectedColor}</h3>
             <div className="flex flex-wrap gap-2">
               {product.colors.map((color: string) => (
@@ -354,6 +305,36 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
                 />
               ))}
             </div>
+            
+            {/* Gender Selection - if available */}
+            {product.genders && product.genders.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2">Gender: {selectedGender}</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {product.genders.map((gender: string) => (
+                    <button
+                      key={gender}
+                      onClick={() => setSelectedGender(gender)}
+                      className={`py-2 border rounded-md text-sm ${
+                        selectedGender === gender
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      {gender}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Brand Information - if available */}
+            {product.brand && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium">Brand</h3>
+                <p className="text-gray-700">{product.brand}</p>
+              </div>
+            )}
           </div>
           
           {/* Size Selection */}
@@ -456,8 +437,26 @@ export default function ProductDetailPage({ productId }: { productId: string }) 
           {/* Product Description */}
           <div className="border-t pt-6 animate-in">
             <h3 className="text-lg font-medium mb-3">Product Description</h3>
-            <p className="text-gray-700">{product.description}</p>
+            <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: product.description }}></div>
           </div>
+          
+          {/* Categories */}
+          {product.categories && product.categories.length > 0 && (
+            <div className="animate-in">
+              <h3 className="text-lg font-medium mb-3">Categories</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.categories.map((category: string, index: number) => (
+                  <a 
+                    key={index}
+                    href={`/products?category=${encodeURIComponent(category)}`}
+                    className="px-3 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    {category}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Product Features */}
           <div className="animate-in">

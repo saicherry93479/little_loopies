@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import CheckoutPage from "./_components/CheckoutPage";
+
+// Redirect is handled by middleware if not authenticated
+---
+
+<Layout>
+  <CheckoutPage client:load />
+</Layout>

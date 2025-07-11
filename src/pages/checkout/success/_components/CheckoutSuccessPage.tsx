@@ -1,15 +1,57 @@
 import { useEffect, useState } from 'react';
+import { mailSender } from '@/lib/aws/mail';
+import { useCartStore } from '@/lib/store/cart';
+import { useAuthStore } from '@/lib/store/auth';
 
 export default function CheckoutSuccessPage() {
   const [orderNumber] = useState(`ORD-${Math.floor(Math.random() * 1000000)}`);
   const [countdown, setCountdown] = useState(10);
+  const { user } = useAuthStore();
+  const { items, clearCart, getTotalPrice } = useCartStore();
 
+  // Send order confirmation email
+  useEffect(() => {
+    const sendOrderConfirmationEmail = async () => {
+      if (user?.email && items.length > 0) {
+        try {
+          // Format items for email
+          const emailItems = items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            subtotal: item.price * item.quantity
+          }));
+          
+          // Mock shipping address - in a real app, this would come from the checkout form
+          const shippingAddress = "123 Main St, Anytown, AN 12345";
+          
+          // Send email
+          await mailSender.sendOrderConfirmationEmail({
+            email: user.email,
+            orderNumber,
+            items: emailItems,
+            total: getTotalPrice(),
+            shippingAddress,
+            trackingNumber: `TRK-${Math.floor(Math.random() * 1000000)}`,
+            estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+          });
+          
+          console.log('Order confirmation email sent');
+        } catch (error) {
+          console.error('Failed to send order confirmation email:', error);
+        }
+      }
+    };
+    
+    sendOrderConfirmationEmail();
+  }, [user, items, orderNumber, getTotalPrice]);
   
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
+          clearCart(); // Clear the cart when redirecting
           window.location.href='/'
           return 0;
         }

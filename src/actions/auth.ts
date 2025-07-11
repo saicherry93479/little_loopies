@@ -63,6 +63,14 @@ export const login = defineAction({
       );
 
       locals.user = user[0];
+      
+      // If user is a store type, check if they're trying to access customer site
+      if (user[0].userType === "Store" && !req.url.includes("/dashboard")) {
+        return {
+          success: false,
+          message: "Store accounts can only access the dashboard",
+        };
+      }
 
       return {
         success: true,
@@ -275,7 +283,15 @@ export const setPassword = defineAction({
       try {
         // Transaction 1: Handle user creation/update
         await db.transaction(async (tx) => {
-          if (tempUser.type === "new_signup") {
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            userType: users.userType,
+            status: users.status,
+            password: users.password,
+            createdAt: users.createdAt
+          })
             user = await tx
               .insert(users)
               .values({

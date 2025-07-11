@@ -143,6 +143,28 @@ export const columns = (
       header: "Is Wholesale Enabled",
     },
     {
+      accessorKey: "categories",
+      header: "Categories",
+      cell: ({ row }) => {
+        const categories = row.getValue("categories") || [];
+        const displayCount = Math.min(2, categories.length);
+        const remainingCount = categories.length - displayCount;
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {categories.slice(0, displayCount).map((category, index) => (
+              <Badge key={index} variant="secondary">
+                {category.categoryId}
+              </Badge>
+            ))}
+            {remainingCount > 0 && (
+              <Badge variant="outline">+{remainingCount}</Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "activeForUsers",
       header: "User Purchase",
     },
@@ -152,7 +174,7 @@ export const columns = (
       cell: ({ row }) => {
         return (
           <div className="text-center font-medium">
-            {row.getValue("items").length}
+            {row.getValue("items")?.length || 0}
           </div>
         );
       },
@@ -175,28 +197,6 @@ export const columns = (
           month: "short",
           day: "numeric",
         });
-      },
-    },
-    {
-      accessorKey: "categories",
-      header: "Categories",
-      cell: ({ row }) => {
-        const categories = row.getValue("categories") || [];
-        const displayCount = Math.min(2, categories.length);
-        const remainingCount = categories.length - displayCount;
-
-        return (
-          <div className="flex flex-wrap gap-1">
-            {categories.slice(0, displayCount).map((category, index) => (
-              <Badge key={index} variant="secondary">
-                {category.categoryId}
-              </Badge>
-            ))}
-            {remainingCount > 0 && (
-              <Badge variant="outline">+{remainingCount}</Badge>
-            )}
-          </div>
-        );
       },
     },
     {

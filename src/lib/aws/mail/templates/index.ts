@@ -90,20 +90,20 @@ export function getOrderConfirmationTemplate(props: OrderEmailParams) {
       <div class="content">
         <p>Thank you for your order! We'll notify you when your order ships.</p>
         
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #dee2e6;">
           <thead>
-            <tr style="background-color: #f8f9fa;">
-              <th style="padding: 10px; text-align: left;">Item</th>
-              <th style="padding: 10px; text-align: center;">Qty</th>
-              <th style="padding: 10px; text-align: right;">Price</th>
-              <th style="padding: 10px; text-align: right;">Subtotal</th>
+            <tr style="background-color: #f0f0f0;">
+              <th style="padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6;">Item</th>
+              <th style="padding: 12px; text-align: center; border-bottom: 1px solid #dee2e6;">Qty</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 1px solid #dee2e6;">Price</th>
+              <th style="padding: 12px; text-align: right; border-bottom: 1px solid #dee2e6;">Subtotal</th>
             </tr>
           </thead>
           <tbody>
             ${itemsList}
-            <tr style="border-top: 2px solid #dee2e6;">
-              <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-              <td style="padding: 10px; text-align: right;"><strong>₹${props.total.toFixed(2)}</strong></td>
+            <tr style="border-top: 2px solid #dee2e6; background-color: #f8f9fa;">
+              <td colspan="3" style="padding: 12px; text-align: right;"><strong>Total:</strong></td>
+              <td style="padding: 12px; text-align: right;"><strong>₹${props.total.toFixed(2)}</strong></td>
             </tr>
           </tbody>
         </table>
@@ -111,8 +111,8 @@ export function getOrderConfirmationTemplate(props: OrderEmailParams) {
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="margin: 0 0 10px 0;">Shipping Address</h3>
           <p style="margin: 0;">${props.shippingAddress}</p>
-        </div>
-
+          ${props.estimatedDelivery ? `<p>Estimated Delivery: ${props.estimatedDelivery}</p>` : ""}
+          <a href="/track/${props.trackingNumber}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff !important; text-decoration: none; border-radius: 5px; margin: 20px 0;">Track Package</a>
         ${trackingSection}
 
         <p>If you have any questions about your order, please contact our customer service.</p>

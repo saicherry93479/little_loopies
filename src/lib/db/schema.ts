@@ -141,6 +141,8 @@ export const products = sqliteTable("products", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+  brand: text("brand"),
+  gender: text("gender"),
   name: text("name").notNull(),
   description: text("description"),
   images: text("images", { mode: "json" }).$type<string[]>(),
