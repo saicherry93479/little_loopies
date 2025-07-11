@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'astro:transitions/client'
 
 const navItems = [
   { 
@@ -54,6 +55,23 @@ const navItems = [
 
 export function NavLinks() {
   const [activeItem, setActiveItem] = useState<string | null>(null)
+  const navigate = useNavigate()
+  
+  const handleNavClick = (item: any) => {
+    if (item.label === 'Men') {
+      navigate('/products?category=men')
+    } else if (item.label === 'Women') {
+      navigate('/products?category=women')
+    } else if (item.label === 'Kids') {
+      navigate('/products?category=kids')
+    } else if (item.label === 'Beauty') {
+      navigate('/products?category=beauty')
+    } else if (item.label === 'Home') {
+      navigate('/products?category=home')
+    } else {
+      navigate('/products')
+    }
+  }
 
   return (
     <nav className="border-b border-gray-200">
@@ -71,6 +89,7 @@ export function NavLinks() {
                 className={`h-full px-4 flex items-center space-x-1 ${
                   item.color || 'text-gray-800'
                 } hover:text-gray-600 relative`}
+                onClick={() => handleNavClick(item)}
               >
                 <span>{item.label}</span>
                 {/* Underline effect */}
@@ -86,6 +105,10 @@ export function NavLinks() {
                     <a
                       key={subItem}
                       href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/products?category=${subItem.toLowerCase()}`);
+                      }}
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
                     >
                       {subItem}

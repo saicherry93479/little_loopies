@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Filters } from "./Filters";
 import { Breadcrumb } from "./Breadcrumb";
+import { useEffect, useState, useRef } from "react";
 import { ProductCardSkeleton } from "../../../components/ProductCardSkeleton";
 import { ProductCard } from "../../../components/ProductCard";
 
@@ -99,7 +100,9 @@ type SortOption = 'newest' | 'price-asc' | 'price-desc' | 'popular' | 'rating';
 
 export default function Products() {
   const [filters, setFilters] = useState<FilterState>({
-    category: [],
+    category: new URLSearchParams(window.location.search).get('category') 
+      ? [new URLSearchParams(window.location.search).get('category')] 
+      : [],
     gender: [],
     priceRange: [0, 10000],
     rating: null,
@@ -115,7 +118,20 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
 
-  const productsGridRef = useRef<HTMLDivElement>(null)
+  const productsGridRef = useRef<HTMLDivElement>(null);
+  
+  // Handle URL parameters for filtering
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get('category');
+    
+    if (categoryParam) {
+      setFilters(prev => ({
+        ...prev,
+        category: [categoryParam]
+      }));
+    }
+  }, []);
 
   // Function to animate products transition
   const animateProductsChange = (newProducts: typeof products) => {

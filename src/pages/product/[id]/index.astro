@@ -1,0 +1,10 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import ProductDetailPage from "./_components/ProductDetailPage";
+
+const { id } = Astro.params;
+---
+
+<Layout>
+  <ProductDetailPage productId={id} client:load />
+</Layout>

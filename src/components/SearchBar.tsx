@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "astro:transitions/client";
 import {
   Command,
   CommandEmpty,
@@ -27,6 +28,7 @@ interface SearchResult {
 export function SearchBar() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const debouncedQuery = useDebounce(query, 300);
@@ -102,7 +104,11 @@ export function SearchBar() {
                             <a 
                               href={item.href}
                               className="flex items-center gap-4 w-full"
-                              onClick={() => setOpen(false)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setOpen(false);
+                                navigate(item.href);
+                              }}
                             >
                               {item.image ? (
                                 <img 
@@ -132,7 +138,11 @@ export function SearchBar() {
                             <a 
                               href={item.href}
                               className="flex items-center gap-4 w-full"
-                              onClick={() => setOpen(false)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setOpen(false);
+                                navigate(item.href);
+                              }}
                             >
                               <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
                                 <Store className="w-6 h-6 text-muted-foreground" />
@@ -154,4 +164,4 @@ export function SearchBar() {
       </Popover>
     </div>
   );
-} 
+}

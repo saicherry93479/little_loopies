@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { useNavigate } from 'astro:transitions/client'
+import { useCartStore } from '@/lib/store/cart'
+import { useWishlistStore } from '@/lib/store/wishlist'
 
 interface ProductCardProps {
   product: {
@@ -17,6 +20,36 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const { addItem: addToCart } = useCartStore()
+  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
+  
+  const handleProductClick = () => {
+    navigate(`/product/${product.id}`)
+  }
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.image,
+      brand: product.brand
+    })
+  }
+  
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    addToWishlist({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      brand: product.brand
+    })
+  }
 
   useEffect(() => {
     const card = cardRef.current
@@ -43,7 +76,8 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div 
       ref={cardRef}
-      className="flex-shrink-0 w-[230px]"
+      className="flex-shrink-0 w-[230px] cursor-pointer"
+      onClick={handleProductClick}
     >
       <div className="relative">
         <img 
@@ -61,8 +95,20 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="mt-4">
         <div className="flex items-center justify-between">
           <h3 className="font-medium">{product.brand}</h3>
-          <div className="flex items-center">
-            {/* Add to wishlist button */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleAddToWishlist}
+              className={`p-1 rounded-full ${isInWishlist(product.id.toString()) ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'}`}
+              disabled={isInWishlist(product.id.toString())}
+            >
+              ♥
+            </button>
+            <button 
+              onClick={handleAddToCart}
+              className="p-1 rounded-full text-gray-400 hover:text-gray-600"
+            >
+              🛒
+            </button>
           </div>
         </div>
 
