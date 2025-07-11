@@ -1,31 +1,67 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import NewProductScreen from "./_components/NewProductScreen";
+import EnhancedProductPage from "./_components/NewProductScreen";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { products } from "@/lib/db/schema";
+import { products, productVariants } from "@/lib/db/schema";
 
 const { productId } = Astro.params;
 let productData = null;
 
 if (productId !== "new") {
-  let data = await db.query.products.findMany({
+  // Fetch product with all related data
+  const product = await db.query.products.findFirst({
     where: eq(products.id, productId),
     with: {
       categories: true,
       wholesalePriceTiers: true,
     },
   });
-  productData = data.length > 0 ? data[0] : null;
+
+  if (product) {
+    // Get all variants for this product
+    const variants = await db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.productId, productId));
+
+    // Group variants by color
+    const colorVariants = variants.reduce((acc, variant) => {
+      if (!acc[variant.color]) {
+        acc[variant.color] = {
+          color: variant.color,
+          images: variant.images || [],
+          price: variant.price,
+          discountPercentage: variant.discountPercentage,
+          sku: variant.sku,
+          isActive: variant.isActive,
+          sizes: [],
+        };
+      }
+      
+      acc[variant.color].sizes.push({
+        size: variant.size,
+        quantity: variant.stock,
+      });
+      
+      return acc;
+    }, {} as Record<string, any>);
+
+    productData = {
+      ...product,
+      colorVariants: Object.values(colorVariants),
+    };
+  }
 }
 
-const { permissions ,user} = Astro.locals;
-console.log("permissions in productpage  ", permissions);
-if (!permissions.includes("Product_Write") &&  user?.userType!=='admin') {
+const { permissions, user } = Astro.locals;
+console.log("permissions in product page ", permissions);
+
+if (!permissions.includes("Product_Write") && user?.userType !== 'admin') {
   return Astro.redirect("/dashboard/no-access", 302);
 }
 ---
 
-<DashboardLayout title="admin">
-  <NewProductScreen productData={productData} client:load />
+<DashboardLayout title="Product Management">
+  <EnhancedProductPage productData={productData} client:load />
 </DashboardLayout>

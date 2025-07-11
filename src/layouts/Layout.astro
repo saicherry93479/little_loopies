@@ -1,6 +1,7 @@
 ---
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 const { user, permissions } = Astro.locals;
 console.log("permissions layout", permissions);
@@ -23,6 +24,7 @@ console.log('user is ',user)
     />
   </head>
   <body>
+    <ClientRouter />
     <Navbar client:load  user={user}/>
     <slot />
     <Footer client:load />

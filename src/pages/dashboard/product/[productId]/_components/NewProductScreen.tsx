@@ -1,13 +1,20 @@
+import React from 'react';
 import PageContainer from "@/components/dashbaord/PageContainer";
 import DynamicForm from "@/components/dashbaord/GloabalForm/DynamicForm";
-import { formConfig } from "./config";
+import { formConfig, transformProductDataForForm } from "./config";
 import { z } from "zod";
 
-const SamplePage = ({ productData }: any) => {
+interface ProductPageProps {
+  productData?: any;
+}
+
+const EnhancedProductPage: React.FC<ProductPageProps> = ({ productData }) => {
   console.log("productData ", productData);
+  
   const getFormConfig = () => {
     if (!productData) return formConfig;
 
+    // Add ID field for update mode
     const idField = {
       name: "id",
       type: "input" as const,
@@ -18,47 +25,36 @@ const SamplePage = ({ productData }: any) => {
       editable: false,
     };
 
-    // console.log(
-    //   productData.wholesalePriceTiers.map((item, i) => ({
-    //     [`quantity_${i}`]: item.quantity,
-    //     [`price_${i}`]: item.pricePerUnit,
-    //   }))
-    // );
+    // Transform the product data to match form structure
+    const transformedData = transformProductDataForForm(productData);
+
     return {
       ...formConfig,
-      defaultValues: {
-        ...{
-          name: productData.name,
-          id: productData.id,
-          description: productData.description,
-          productQuantity: productData.productQuantity,
-          brand: productData.brand || "",
-          gender: productData.gender || "",
-          images: productData.images,
-          isWholesaleEnabled: productData.isWholesaleEnabled,
-
-          userPrice: productData.userPrice,
-          weight: productData.productWeight,
-          userDiscountPercentage: productData.userDiscountPercentage,
-          activeForUsers: productData.activeForUsers,
-          pricing: productData.wholesalePriceTiers.map((item, i) => ({
-            quantity: item.quantity,
-            price: item.pricePerUnit,
-          })),
-        },
-        ...(productData.categories.length > 0
-          ? { categories: productData.categories[0].categoryId }
-          : {}),
-      },
+      defaultValues: transformedData,
       fields: [idField, ...formConfig.fields],
     };
   };
 
   return (
     <PageContainer>
-      <DynamicForm config={getFormConfig()} />
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">
+            {productData ? 'Edit Product' : 'Add New Product'}
+          </h1>
+          {productData && (
+            <div className="text-sm text-gray-500">
+              Product ID: {productData.id}
+            </div>
+          )}
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <DynamicForm config={getFormConfig()} />
+        </div>
+      </div>
     </PageContainer>
   );
 };
 
-export default SamplePage;
+export default EnhancedProductPage;
