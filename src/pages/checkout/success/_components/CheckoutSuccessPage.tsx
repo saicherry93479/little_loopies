@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'astro:transitions/client';
 
 export default function CheckoutSuccessPage() {
   const [orderNumber] = useState(`ORD-${Math.floor(Math.random() * 1000000)}`);
   const [countdown, setCountdown] = useState(10);
-  const navigate = useNavigate();
+
   
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/');
+          window.location.href='/'
           return 0;
         }
         return prev - 1;
@@ -19,7 +18,7 @@ export default function CheckoutSuccessPage() {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="max-w-[800px] mx-auto px-4 py-16 text-center">
@@ -51,12 +50,12 @@ export default function CheckoutSuccessPage() {
       </div>
       
       <div className="space-y-4">
-        <button 
-          onClick={() => navigate('/products')}
+        <a 
+          href='/products'
           className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
         >
           Continue Shopping
-        </button>
+        </a>
         
         <p className="text-sm text-gray-500">
           You will be redirected to the home page in {countdown} seconds

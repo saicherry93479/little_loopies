@@ -1,12 +1,10 @@
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useCartStore } from '@/lib/store/cart';
-import { useNavigate } from 'astro:transitions/client';
 import { useState } from 'react';
 
 export default function WishlistPage() {
   const { items, removeItem } = useWishlistStore();
   const { addItem } = useCartStore();
-  const navigate = useNavigate();
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
 
   const handleAddToCart = (item: any) => {
@@ -30,12 +28,12 @@ export default function WishlistPage() {
         <h1 className="text-3xl font-bold mb-6">Your Wishlist</h1>
         <div className="bg-gray-50 rounded-lg p-8">
           <p className="text-xl mb-6">Your wishlist is empty</p>
-          <button 
-            onClick={() => navigate('/products')}
+          <a 
+            href='/products'
             className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
           >
             Explore Products
-          </button>
+          </a>
         </div>
       </div>
     );
@@ -75,12 +73,12 @@ export default function WishlistPage() {
                 >
                   {addingToCart === item.id ? 'Adding...' : 'Add to Cart'}
                 </button>
-                <button 
-                  onClick={() => navigate(`/product/${item.id}`)}
+                <a 
+                  href={`/product/${item.id}`}
                   className="w-full py-2 border border-black rounded-md hover:bg-gray-50 transition-colors"
                 >
                   View Details
-                </button>
+                </a>
               </div>
             </div>
           </div>
