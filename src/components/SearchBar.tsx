@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "astro:transitions/client";
 import {
   Command,
   CommandEmpty,
@@ -28,7 +27,6 @@ interface SearchResult {
 export function SearchBar() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const debouncedQuery = useDebounce(query, 300);
@@ -107,7 +105,7 @@ export function SearchBar() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 setOpen(false);
-                                navigate(item.href);
+               
                               }}
                             >
                               {item.image ? (
@@ -141,7 +139,7 @@ export function SearchBar() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 setOpen(false);
-                                navigate(item.href);
+           
                               }}
                             >
                               <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">

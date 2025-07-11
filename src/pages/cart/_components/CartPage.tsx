@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
-import { useNavigate } from 'astro:transitions/client';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const navigate = useNavigate();
   
   const handleCheckout = () => {
     setIsCheckingOut(true);
@@ -122,12 +120,12 @@ export default function CartPage() {
           </button>
           
           <div className="mt-4">
-            <button 
-              onClick={() => navigate('/products')}
+            <a 
+              href='/products'
               className="w-full py-3 border border-black rounded-md hover:bg-gray-50 transition-colors"
             >
               Continue Shopping
-            </button>
+            </a>
           </div>
         </div>
       </div>

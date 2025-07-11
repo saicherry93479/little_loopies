@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { useNavigate } from 'astro:transitions/client'
 import { useCartStore } from '@/lib/store/cart'
 import { useWishlistStore } from '@/lib/store/wishlist'
 
@@ -20,13 +19,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
   const { addItem: addToCart } = useCartStore()
   const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
   
-  const handleProductClick = () => {
-    navigate(`/product/${product.id}`)
-  }
+
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -74,10 +70,10 @@ export function ProductCard({ product }: ProductCardProps) {
   }, [])
 
   return (
-    <div 
+    <a 
       ref={cardRef}
       className="flex-shrink-0 w-[230px] cursor-pointer"
-      onClick={handleProductClick}
+      href={`/product/${product.id}`}
     >
       <div className="relative">
         <img 
@@ -147,6 +143,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </a>
   )
 } 

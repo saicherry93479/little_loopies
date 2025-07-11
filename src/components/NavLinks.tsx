@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'astro:transitions/client'
 
 const navItems = [
   { 
@@ -55,21 +54,21 @@ const navItems = [
 
 export function NavLinks() {
   const [activeItem, setActiveItem] = useState<string | null>(null)
-  const navigate = useNavigate()
+
   
   const handleNavClick = (item: any) => {
     if (item.label === 'Men') {
-      navigate('/products?category=men')
+      return '/products?category=men'
     } else if (item.label === 'Women') {
-      navigate('/products?category=women')
+      return '/products?category=women'
     } else if (item.label === 'Kids') {
-      navigate('/products?category=kids')
+      return '/products?category=kids'
     } else if (item.label === 'Beauty') {
-      navigate('/products?category=beauty')
+      return '/products?category=beauty'
     } else if (item.label === 'Home') {
-      navigate('/products?category=home')
+      return '/products?category=home'
     } else {
-      navigate('/products')
+      return '/products'
     }
   }
 
@@ -85,18 +84,18 @@ export function NavLinks() {
               onMouseEnter={() => setActiveItem(item.label)}
               onMouseLeave={() => setActiveItem(null)}
             >
-              <button
+              <a
                 className={`h-full px-4 flex items-center space-x-1 ${
                   item.color || 'text-gray-800'
                 } hover:text-gray-600 relative`}
-                onClick={() => handleNavClick(item)}
+                href ={handleNavClick(item)}
               >
                 <span>{item.label}</span>
                 {/* Underline effect */}
                 <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-black transform origin-left transition-transform duration-200 ${
                   activeItem === item.label ? 'scale-x-100' : 'scale-x-0'
                 }`} />
-              </button>
+              </a>
 
               {/* Dropdown Menu */}
               {activeItem === item.label && (
@@ -104,11 +103,8 @@ export function NavLinks() {
                   {item.items.map((subItem) => (
                     <a
                       key={subItem}
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate(`/products?category=${subItem.toLowerCase()}`);
-                      }}
+                      href={`/products?category=${subItem.toLowerCase()}`}
+                     
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
                     >
                       {subItem}

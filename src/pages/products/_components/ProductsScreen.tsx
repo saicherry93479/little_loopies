@@ -3,7 +3,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Filters } from "./Filters";
 import { Breadcrumb } from "./Breadcrumb";
-import { useEffect, useState, useRef } from "react";
 import { ProductCardSkeleton } from "../../../components/ProductCardSkeleton";
 import { ProductCard } from "../../../components/ProductCard";
 

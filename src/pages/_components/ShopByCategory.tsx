@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useNavigate } from 'astro:transitions/client'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -41,7 +40,7 @@ const categories = [
 export function ShopByCategory() {
   const sectionRef = useRef<HTMLElement>(null)
   const cardsRef = useRef<HTMLDivElement[]>([])
-  const navigate = useNavigate()
+
 
   useEffect(() => {
     const section = sectionRef.current
@@ -85,11 +84,12 @@ export function ShopByCategory() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
         {categories.map((category, index) => (
-          <div
+          <a
             key={category.title}
             ref={el => el && (cardsRef.current[index] = el)}
             className="group cursor-pointer"
-            onClick={() => navigate(`/products?category=${category.slug}`)}
+            href={`/products?category=${category.slug}`}
+         
           >
             <div className="relative aspect-[3/4] overflow-hidden mb-4">
               <img
@@ -99,7 +99,7 @@ export function ShopByCategory() {
               />
             </div>
             <h3 className="text-center font-medium">{category.title}</h3>
-          </div>
+          </a>
         ))}
       </div>
     </section>
