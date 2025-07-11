@@ -3,8 +3,9 @@ import Layout from "../../layouts/Layout.astro";
 import OrdersPage from "./_components/OrdersPage";
 
 // Redirect is handled by middleware if not authenticated
+const user=Astro.locals.user
 ---
 
 <Layout>
-  <OrdersPage client:load />
+  <OrdersPage client:load  user={user}/>
 </Layout>

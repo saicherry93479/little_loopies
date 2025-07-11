@@ -3,10 +3,10 @@ import { useAuthStore } from '@/lib/store/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { AuthGuard } from '@/components/AuthGuard';
 
-export default function AccountPage() {
-  const { user, logout } = useAuthStore();
+
+export default function AccountPage({user}) {
+  const {  logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState("profile");
   
   const handleLogout = async () => {
@@ -15,7 +15,7 @@ export default function AccountPage() {
   };
 
   return (
-    <AuthGuard>
+
       <div className="max-w-[1200px] mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">My Account</h1>
         
@@ -111,6 +111,6 @@ export default function AccountPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </AuthGuard>
+
   );
 }

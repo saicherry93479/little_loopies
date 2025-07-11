@@ -7,7 +7,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { useWishlistStore } from "@/lib/store/wishlist";
 import { ShoppingBag, Heart } from "lucide-react";
 
-export function Navbar() {
+export function Navbar({user}:{user:any }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const cartItemsCount = useCartStore((state) => state.getTotalItems());
   const wishlistItemsCount = useWishlistStore((state) => state.items.length);
@@ -30,7 +30,7 @@ export function Navbar() {
 
           {/* Right side icons */}
           <div className="flex items-center gap-6">
-            <UserMenu />
+            <UserMenu user={user} />
             <a href="/cart" className="relative text-gray-800 hover:text-gray-600" >
               <ShoppingBag className="w-6 h-6" />
               <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">

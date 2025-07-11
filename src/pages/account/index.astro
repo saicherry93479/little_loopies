@@ -3,8 +3,9 @@ import Layout from "../../layouts/Layout.astro";
 import AccountPage from "./_components/AccountPage";
 
 // Redirect is handled by middleware if not authenticated
+const user = Astro.locals.user
 ---
 
 <Layout>
-  <AccountPage client:load />
+  <AccountPage client:load user={user} />
 </Layout>

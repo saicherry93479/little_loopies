@@ -10,8 +10,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User, ShoppingBag, Heart, UserCircle } from "lucide-react";
 
-export function UserMenu() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+export function UserMenu({user}) {
+  const {   logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function UserMenu() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <a href="/auth/login" className="flex items-center gap-2 text-gray-800 hover:text-gray-600">
         <UserCircle className="w-5 h-5" />

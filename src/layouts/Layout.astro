@@ -2,7 +2,9 @@
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
 import "../styles/global.css";
-
+const { user, permissions } = Astro.locals;
+console.log("permissions layout", permissions);
+console.log('user is ',user)
 ---
 
 <!doctype html>
@@ -21,7 +23,7 @@ import "../styles/global.css";
     />
   </head>
   <body>
-    <Navbar client:load />
+    <Navbar client:load  user={user}/>
     <slot />
     <Footer client:load />
   </body>

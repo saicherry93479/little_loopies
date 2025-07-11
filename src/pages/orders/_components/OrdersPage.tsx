@@ -1,9 +1,9 @@
-import { AuthGuard } from '@/components/AuthGuard';
+
 import { Button } from '@/components/ui/button';
 
-export default function OrdersPage() {
+export default function OrdersPage({user}) {
   return (
-    <AuthGuard>
+ 
       <div className="max-w-[1200px] mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">My Orders</h1>
         
@@ -15,6 +15,6 @@ export default function OrdersPage() {
           </Button>
         </div>
       </div>
-    </AuthGuard>
+
   );
 }
